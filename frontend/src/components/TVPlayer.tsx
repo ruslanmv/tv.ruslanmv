@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import ReactPlayer from 'react-player/youtube';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from "react";
+import ReactPlayer from "react-player";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Section {
   id: string;
@@ -35,7 +35,7 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [showOverlay, setShowOverlay] = useState(true);
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
-  const playerRef = useRef<ReactPlayer>(null);
+  const playerRef = useRef<ReactPlayer | null>(null);
 
   useEffect(() => {
     if (showOverlay && autoPlay) {
@@ -47,7 +47,7 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
   useEffect(() => {
     if (episode?.sections) {
       const section = episode.sections.find(
-        s => currentTime >= s.start_time && currentTime <= s.end_time
+        (s) => currentTime >= s.start_time && currentTime <= s.end_time
       );
       if (section) setCurrentSection(section);
     }
@@ -59,26 +59,26 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
 
   const jumpToSection = (section: Section) => {
     if (playerRef.current) {
-      playerRef.current.seekTo(section.start_time, 'seconds');
+      playerRef.current.seekTo(section.start_time, "seconds");
       setPlaying(true);
     }
   };
 
   const getSectionIcon = (sectionType: string): string => {
     const icons: { [key: string]: string } = {
-      news: '📰',
-      tech: '🚀',
-      deepdive: '🔍',
-      research: '🔬',
-      packages: '📦',
+      news: "📰",
+      tech: "🚀",
+      deepdive: "🔍",
+      research: "🔬",
+      packages: "📦",
     };
-    return icons[sectionType] || '📺';
+    return icons[sectionType] || "📺";
   };
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   if (!episode) {
@@ -87,11 +87,16 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
         <div className="text-center text-white">
           <div className="animate-pulse text-6xl mb-4">📺</div>
           <h2 className="text-2xl font-bold">No Episode Available</h2>
-          <p className="text-gray-400 mt-2">Check back soon for new content!</p>
+          <p className="text-gray-400 mt-2">
+            Check back soon for new content!
+          </p>
         </div>
       </div>
     );
   }
+
+  const formattedDurationMinutes = Math.floor(episode.duration / 60);
+  const formattedDurationSeconds = Math.floor(episode.duration % 60);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black overflow-hidden">
@@ -125,7 +130,8 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
               ● LIVE
             </span>
             <span className="text-gray-400 text-sm">
-              Episode #{episode.episode_number} • {new Date(episode.published_at).toLocaleDateString()}
+              Episode #{episode.episode_number} •{" "}
+              {new Date(episode.published_at).toLocaleDateString()}
             </span>
           </div>
         </motion.div>
@@ -138,13 +144,16 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
           className="relative max-w-6xl mx-auto"
         >
           {/* TV Bezel */}
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl"
-               style={{
-                 background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                 padding: '2rem',
-                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.1)'
-               }}>
-            
+          <div
+            className="relative rounded-3xl overflow-hidden shadow-2xl"
+            style={{
+              background:
+                "linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+              padding: "2rem",
+              boxShadow:
+                "0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.1)",
+            }}
+          >
             {/* Screen */}
             <div className="relative bg-black rounded-2xl overflow-hidden aspect-video">
               <ReactPlayer
@@ -161,8 +170,8 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
                     playerVars: {
                       modestbranding: 1,
                       rel: 0,
-                    }
-                  }
+                    },
+                  },
                 }}
               />
 
@@ -189,13 +198,17 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
                         onClick={() => setPlaying(!playing)}
                         className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold text-lg transition-all transform hover:scale-105"
                       >
-                        {playing ? '⏸ PAUSE' : '▶ PLAY'}
+                        {playing ? "⏸ PAUSE" : "▶ PLAY"}
                       </button>
-                      
+
                       {currentSection && (
                         <div className="bg-black/60 backdrop-blur-sm px-6 py-3 rounded-full">
-                          <span className="text-purple-400 font-bold">NOW:</span>
-                          <span className="text-white ml-2">{currentSection.title}</span>
+                          <span className="text-purple-400 font-bold">
+                            NOW:
+                          </span>
+                          <span className="text-white ml-2">
+                            {currentSection.title}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -212,10 +225,13 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-gray-400 text-sm">POWER</span>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <div className="text-gray-500 text-xs font-mono">
-                  {Math.floor(currentTime / 60)}:{(Math.floor(currentTime % 60)).toString().padStart(2, '0')} / {Math.floor(episode.duration / 60)}:{(episode.duration % 60).toString().padStart(2, '0')}
+                  {formatTime(currentTime)} /{" "}
+                  {`${formattedDurationMinutes}:${formattedDurationSeconds
+                    .toString()
+                    .padStart(2, "0")}`}
                 </div>
               </div>
 
@@ -224,7 +240,7 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
                   onClick={() => setPlaying(!playing)}
                   className="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-white transition-colors"
                 >
-                  {playing ? '⏸' : '▶'}
+                  {playing ? "⏸" : "▶"}
                 </button>
               </div>
             </div>
@@ -243,7 +259,7 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
               <span className="text-3xl">📑</span>
               Episode Sections
             </h3>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {episode.sections.map((section) => (
                 <motion.button
@@ -253,16 +269,19 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
                   whileTap={{ scale: 0.95 }}
                   className={`p-4 rounded-xl text-left transition-all ${
                     currentSection?.id === section.id
-                      ? 'bg-purple-600 shadow-lg shadow-purple-500/50'
-                      : 'bg-gray-800 hover:bg-gray-700'
+                      ? "bg-purple-600 shadow-lg shadow-purple-500/50"
+                      : "bg-gray-800 hover:bg-gray-700"
                   }`}
                 >
-                  <div className="text-2xl mb-2">{getSectionIcon(section.section_type)}</div>
+                  <div className="text-2xl mb-2">
+                    {getSectionIcon(section.section_type)}
+                  </div>
                   <div className="text-white font-semibold text-sm mb-1">
                     {section.title}
                   </div>
                   <div className="text-gray-400 text-xs">
-                    {formatTime(section.start_time)} - {formatTime(section.end_time)}
+                    {formatTime(section.start_time)} -{" "}
+                    {formatTime(section.end_time)}
                   </div>
                 </motion.button>
               ))}
@@ -282,8 +301,9 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
               🤖 AI-Readable Content Available
             </h3>
             <p className="text-gray-300 mb-6">
-              This episode is available via MCP (Model Context Protocol) for AI agents.
-              AI can access structured content, transcripts, and section-specific data.
+              This episode is available via MCP (Model Context Protocol) for AI
+              agents. AI can access structured content, transcripts, and
+              section-specific data.
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
               <code className="px-4 py-2 bg-black/50 rounded-lg text-purple-300 text-sm">

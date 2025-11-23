@@ -1,0 +1,144 @@
+# =============================================================================
+# Global / OS
+# =============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# =============================================================================
+# Git / patch artifacts
+# =============================================================================
+*.orig
+*.rej
+*.patch
+*.diff
+
+# =============================================================================
+# Python (backend, scripts, video pipeline)
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments (uv-managed or manual)
+.venv/
+venv/
+env/
+ENV/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Python tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.tox/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local Python / env metadata
+.python-version
+.env
+.env.*
+*.env
+
+# =============================================================================
+# uv (Python dependency manager)
+# =============================================================================
+.uv/
+
+# =============================================================================
+# Node / Frontend (Next.js)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js build outputs
+.next/
+out/
+.turbo/
+
+# Frontend environment files (keep secrets out of git)
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/.env.test.local
+
+# Lockfiles – keep ONE if you standardize on it.
+# If you only want npm, comment out yarn/pnpm lockfiles.
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# =============================================================================
+# IDE / Editor settings
+# =============================================================================
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# =============================================================================
+# Logs, temp, runtime files
+# =============================================================================
+logs/
+log/
+tmp/
+temp/
+*.pid
+
+# =============================================================================
+# Docker / Compose (local overrides)
+# =============================================================================
+docker-compose.override.yml
+*.local.yml
+*.local.yaml
+
+# =============================================================================
+# Project-specific: TV.RUSLANMV media / outputs
+# =============================================================================
+
+# Video / audio / generated media
+output/
+outputs/
+media/
+assets/generated/
+video-processor/output/
+scripts/output/
+scripts/generated/
+
+# Raw data dumps, cache, news feeds
+data/
+data_raw/
+cache/
+news_cache/
+
+# =============================================================================
+# Misc
+# =============================================================================
+*.sqlite3
+*.db
+ copy *.*
+* copy
+uv.lock
+* copy *
