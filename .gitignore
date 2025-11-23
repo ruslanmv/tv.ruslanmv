@@ -142,3 +142,6 @@ news_cache/
 * copy
 uv.lock
 * copy *
+
+* copy*.*
+/backup

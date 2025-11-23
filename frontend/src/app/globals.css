@@ -56,3 +56,96 @@ body {
     transform: translate(0px, 0px) scale(1);
   }
 }
+
+/* =============================================================================
+ * TV.RuslanMV theme (landing page)
+ * - Fonts: Orbitron + Inter
+ * - Colors: primary / secondary / accent
+ * - Utilities: gradient-bg, glass-effect, news-ticker, marquee, etc.
+ * ============================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
+
+:root {
+  --mm-bg: #f5f5f5;
+  --mm-surface: #ffffff;
+  --mm-border: #e8e8e8;
+  --mm-text: #111111;
+  --mm-text-muted: #6c757d;
+  --mm-accent: #2a7ae2;
+  --mm-accent-dark: #205caa;
+}
+
+.font-orbitron {
+  font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.font-inter {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Map some custom token-style classes to real colors */
+.bg-secondary {
+  background-color: var(--mm-bg);
+}
+
+.bg-primary {
+  background-color: var(--mm-accent);
+}
+
+.text-primary {
+  color: var(--mm-accent);
+}
+
+.bg-accent {
+  background-color: var(--mm-accent-dark);
+}
+
+/* Gradient helpers used by the landing page */
+.from-neon-blue {
+  --tw-gradient-from: #2a7ae2 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgba(42,122,226,0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-neon-pink {
+  --tw-gradient-to: #205caa var(--tw-gradient-to-position);
+}
+
+/* Layout helpers */
+.gradient-bg {
+  background: linear-gradient(180deg, #f5f5f5 0%, #ffffff 40%, #f5f5f5 100%);
+}
+
+.news-ticker {
+  background: linear-gradient(90deg, transparent, rgba(42, 122, 226, 0.15), transparent);
+}
+
+.glass-effect {
+  background: var(--mm-surface);
+  backdrop-filter: none;
+  border: 1px solid var(--mm-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+/* Simple marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Optional scanline-style background */
+.bg-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.06) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
