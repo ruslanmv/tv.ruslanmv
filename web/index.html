@@ -1,0 +1,1293 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <base target="_self">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TV.RuslanMV - High-Tech News Channel</title>
+
+    <meta name="description" content="TV.RuslanMV - Cutting-edge news coverage with futuristic technology and enterprise-grade broadcasting">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+
+        tailwind.config = {
+
+            theme: {
+
+                extend: {
+
+                    colors: {
+
+                        primary: "#2a7ae2",
+
+                        secondary: "#f5f5f5",
+
+                        accent: "#205caa",
+
+                        dark: "#111827",
+
+                        "neon-blue": "#2a7ae2",
+
+                        "neon-pink": "#205caa",
+
+                        "deep-space": "#ffffff"
+
+                    },
+
+                    fontFamily: {
+
+                        'orbitron': ['Orbitron', 'sans-serif'],
+
+                        'inter': ['Inter', 'sans-serif']
+
+                    },
+
+                    animation: {
+
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+
+                        'float': 'float 6s ease-in-out infinite',
+
+                        'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+
+                    },
+
+                    keyframes: {
+
+                        glow: {
+
+                            '0%': { 'box-shadow': '0 0 5px #2a7ae2, 0 0 10px #2a7ae2, 0 0 15px #2a7ae2' },
+
+                            '100%': { 'box-shadow': '0 0 10px #2a7ae2, 0 0 20px #2a7ae2, 0 0 30px #2a7ae2' }
+
+                        },
+
+                        float: {
+
+                            '0%, 100%': { transform: 'translateY(0px)' },
+
+                            '50%': { transform: 'translateY(-10px)' }
+
+                        },
+
+                        'pulse-glow': {
+
+                            '0%, 100%': { opacity: '1' },
+
+                            '50%': { opacity: '0.7' }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    </script>
+
+    <style>
+
+        :root {
+
+            --mm-bg: #f5f5f5;
+
+            --mm-surface: #ffffff;
+
+            --mm-border: #e8e8e8;
+
+            --mm-text: #111111;
+
+            --mm-text-muted: #6c757d;
+
+            --mm-accent: #2a7ae2;
+
+            --mm-accent-dark: #205caa;
+
+        }
+
+
+
+        .gradient-bg {
+
+            background: linear-gradient(180deg, #f5f5f5 0%, #ffffff 40%, #f5f5f5 100%);
+
+        }
+
+
+
+        .news-ticker {
+
+            background: linear-gradient(90deg, transparent, rgba(42, 122, 226, 0.15), transparent);
+
+        }
+
+
+
+        .glass-effect {
+
+            background: var(--mm-surface);
+
+            backdrop-filter: none;
+
+            border: 1px solid var(--mm-border);
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+
+        }
+
+
+
+        @keyframes ai-speaking {
+
+            0% { height: 4px; opacity: 0.6; }
+
+            50% { height: 16px; opacity: 1; }
+
+            100% { height: 6px; opacity: 0.7; }
+
+        }
+
+
+
+        .ai-eq-bar {
+
+            display: inline-block;
+
+            height: 8px;
+
+            background: linear-gradient(to top, rgba(42, 122, 226, 0.1), rgba(42, 122, 226, 0.9));
+
+            border-radius: 9999px;
+
+            animation: ai-speaking 1s ease-in-out infinite;
+
+        }
+
+
+
+        .ai-eq-bar:nth-child(2) { animation-delay: 0.12s; }
+
+        .ai-eq-bar:nth-child(3) { animation-delay: 0.24s; }
+
+        .ai-eq-bar:nth-child(4) { animation-delay: 0.36s; }
+
+    </style>
+
+</head>
+
+<body class="min-h-screen bg-secondary text-gray-900 font-inter">
+
+    <!-- Breaking News Ticker -->
+
+    <div class="bg-red-600 text-white py-2 overflow-hidden news-ticker">
+
+        <div class="flex animate-marquee whitespace-nowrap">
+
+            <span class="mx-4 font-bold">BREAKING: Global Tech Summit Announces Revolutionary AI Breakthrough</span>
+
+            <span class="mx-4 font-bold">LIVE: Space Mission Launch Coverage</span>
+
+            <span class="mx-4 font-bold">URGENT: Cybersecurity Alert - Major Infrastructure Protection</span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Header -->
+
+    <header class="glass-effect sticky top-0 z-50">
+
+        <div class="container mx-auto px-4 py-4">
+
+            <div class="flex items-center justify-between">
+
+                <!-- Logo -->
+
+                <div class="flex items-center space-x-3">
+
+                    <div class="w-12 h-12 bg-gradient-to-r from-neon-blue to-neon-pink rounded-full animate-pulse-glow"></div>
+
+                    <div>
+
+                        <h1 class="font-orbitron text-2xl font-bold bg-gradient-to-r from-neon-blue to-neon-pink bg-clip-text text-transparent">
+
+                            TV.RUSLANMV
+
+                        </h1>
+
+                        <p class="text-xs text-gray-500">ENTERPRISE NEWS NETWORK</p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Navigation -->
+
+                <nav class="hidden lg:flex items-center space-x-8">
+
+                    <a href="#" class="text-gray-800 hover:text-primary transition-colors duration-300 font-medium" onclick="event.preventDefault(); navigateTo('home')">HOME</a>
+
+                    <a href="#" class="text-gray-800 hover:text-primary transition-colors duration-300 font-medium" onclick="event.preventDefault(); navigateTo('live')">LIVE</a>
+
+                    <a href="#" class="text-gray-800 hover:text-primary transition-colors duration-300 font-medium" onclick="event.preventDefault(); navigateTo('news')">NEWS</a>
+
+                    <a href="#" class="text-gray-800 hover:text-primary transition-colors duration-300 font-medium" onclick="event.preventDefault(); navigateTo('tech')">TECH</a>
+
+                    <a href="#" class="text-gray-800 hover:text-primary transition-colors duration-300 font-medium" onclick="event.preventDefault(); navigateTo('business')">BUSINESS</a>
+
+                    <a href="#" class="text-gray-800 hover:text-primary transition-colors duration-300 font-medium" onclick="event.preventDefault(); navigateTo('about')">ABOUT</a>
+
+                </nav>
+
+
+
+                <!-- Action Buttons -->
+
+                <div class="flex items-center space-x-4">
+
+                    <button class="bg-primary text-white px-6 py-2 rounded-full font-bold hover:bg-accent transition-all duration-300 animate-glow">
+
+                        WATCH LIVE
+
+                    </button>
+
+                    <button class="lg:hidden text-gray-800">
+
+                        <i class="fas fa-bars text-xl"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="gradient-bg">
+
+        <!-- Hero Section -->
+
+        <section class="relative py-20 overflow-hidden">
+
+            <div class="container mx-auto px-4">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+                    <!-- Hero Content -->
+
+                    <div class="space-y-8">
+
+                        <div class="space-y-4">
+
+                            <span class="inline-block px-4 py-2 bg-primary text-white rounded-full text-sm font-bold">
+
+                                LIVE BROADCAST
+
+                            </span>
+
+                            <h2 class="font-orbitron text-4xl lg:text-6xl font-bold leading-tight text-gray-900">
+
+                                THE FUTURE OF
+
+                                <span class="bg-gradient-to-r from-neon-blue to-neon-pink bg-clip-text text-transparent">
+
+                                    NEWS
+
+                                </span>
+
+                                IS HERE
+
+                            </h2>
+
+                            <p class="text-xl text-gray-700 max-w-2xl">
+
+                                Experience cutting-edge news coverage with AI-powered analytics, real-time data visualization, and enterprise-grade broadcasting technology.
+
+                            </p>
+
+                        </div>
+
+                        
+
+                        <div class="flex flex-col sm:flex-row gap-4">
+
+                            <button class="bg-primary text-white px-8 py-4 rounded-lg font-bold hover:bg-accent transition-all duration-300 transform hover:scale-105">
+
+                                <i class="fas fa-play mr-2"></i>
+
+                                WATCH LIVE STREAM
+
+                            </button>
+
+                            <button class="border border-primary text-primary px-8 py-4 rounded-lg font-bold hover:bg-primary hover:text-white transition-all duration-300">
+
+                                <i class="fas fa-info-circle mr-2"></i>
+
+                                CHANNEL INFO
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Hero Visual -->
+
+                    <div class="relative">
+
+                        <div class="glass-effect rounded-2xl p-8 animate-float">
+
+                            <div class="aspect-video bg-gradient-to-br from-dark to-secondary rounded-lg flex items-center justify-center relative">
+
+                                <div class="text-center" id="hero-live-placeholder">
+
+                                    <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+
+                                        <i class="fas fa-play text-white text-2xl"></i>
+
+                                    </div>
+
+                                    <p class="text-primary font-bold">LIVE STREAM ACTIVE</p>
+
+                                    <p class="text-gray-500 text-sm">24/7 Global Coverage</p>
+
+                                </div>
+
+                            </div>
+
+                            <!-- Floating Elements -->
+
+                            <div class="absolute -top-4 -right-4 w-8 h-8 bg-primary rounded-full animate-ping"></div>
+
+                            <div class="absolute -bottom-4 -left-4 w-6 h-6 bg-accent rounded-full animate-pulse"></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- Live News Grid -->
+
+        <section class="py-16">
+
+            <div class="container mx-auto px-4">
+
+                <div class="flex items-center justify-between mb-12">
+
+                    <h3 class="font-orbitron text-3xl font-bold text-gray-900">LATEST NEWS</h3>
+
+                    <div class="flex items-center space-x-2 text-primary">
+
+                        <span class="flex h-3 w-3">
+
+                            <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-primary opacity-75"></span>
+
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+
+                        </span>
+
+                        <span class="font-bold text-gray-800">LIVE UPDATES</span>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                    <!-- News Card 1 -->
+
+                    <div class="glass-effect rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all duration-300">
+
+                        <div class="relative">
+
+                            <img 
+
+                                src="https://picsum.photos/400/250?random=1" 
+
+                                alt="AI Technology Breakthrough" 
+
+                                class="w-full h-48 object-cover"
+
+                                loading="lazy"
+
+                            />
+
+                            <div class="absolute top-4 left-4 bg-accent text-white px-3 py-1 rounded-full text-sm font-bold">
+
+                                TECH
+
+                            </div>
+
+                        </div>
+
+                        <div class="p-6">
+
+                            <h4 class="font-bold text-xl mb-2 text-gray-900">Revolutionary AI System Transforms News Industry</h4>
+
+                            <p class="text-gray-600 mb-4">Groundbreaking artificial intelligence now powers real-time news analysis and predictive reporting.</p>
+
+                            <div class="flex items-center justify-between text-sm">
+
+                                <span class="text-primary font-semibold">2 HOURS AGO</span>
+
+                                <span class="flex items-center text-gray-500">
+
+                                    <i class="fas fa-eye mr-1"></i>
+
+                                    15.2K
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- News Card 2 -->
+
+                    <div class="glass-effect rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all duration-300">
+
+                        <div class="relative">
+
+                            <img 
+
+                                src="https://picsum.photos/400/250?random=2" 
+
+                                alt="Space Mission Launch" 
+
+                                class="w-full h-48 object-cover"
+
+                                loading="lazy"
+
+                            />
+
+                            <div class="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
+
+                                SPACE
+
+                            </div>
+
+                        </div>
+
+                        <div class="p-6">
+
+                            <h4 class="font-bold text-xl mb-2 text-gray-900">Mars Colonization Mission Enters Final Phase</h4>
+
+                            <p class="text-gray-600 mb-4">Historic space mission prepares for launch with advanced life support systems and sustainable habitat technology.</p>
+
+                            <div class="flex items-center justify-between text-sm">
+
+                                <span class="text-primary font-semibold">4 HOURS AGO</span>
+
+                                <span class="flex items-center text-gray-500">
+
+                                    <i class="fas fa-eye mr-1"></i>
+
+                                    23.7K
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- News Card 3 -->
+
+                    <div class="glass-effect rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all duration-300">
+
+                        <div class="relative">
+
+                            <img 
+
+                                src="https://picsum.photos/400/250?random=3" 
+
+                                alt="Cybersecurity Conference" 
+
+                                class="w-full h-48 object-cover"
+
+                                loading="lazy"
+
+                            />
+
+                            <div class="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
+
+                                SECURITY
+
+                            </div>
+
+                        </div>
+
+                        <div class="p-6">
+
+                            <h4 class="font-bold text-xl mb-2 text-gray-900">Global Cybersecurity Summit Addresses Quantum Threats</h4>
+
+                            <p class="text-gray-600 mb-4">World leaders and tech experts collaborate on next-generation security protocols for the quantum computing era.</p>
+
+                            <div class="flex items-center justify-between text-sm">
+
+                                <span class="text-primary font-semibold">6 HOURS AGO</span>
+
+                                <span class="flex items-center text-gray-500">
+
+                                    <i class="fas fa-eye mr-1"></i>
+
+                                    18.9K
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- Live Stream Section -->
+
+        <section class="py-16 bg-gradient-to-r from-dark to-secondary">
+
+            <div class="container mx-auto px-4">
+
+                <div class="text-center mb-12">
+
+                    <h3 class="font-orbitron text-3xl font-bold text-white mb-4">24/7 LIVE BROADCAST</h3>
+
+                    <p class="text-gray-200 max-w-2xl mx-auto">Experience our state-of-the-art broadcasting studio with augmented reality overlays, real-time data feeds, and interactive viewer engagement.</p>
+
+                </div>
+
+
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    <!-- Main Stream -->
+
+                    <div class="lg:col-span-2 glass-effect rounded-2xl p-6">
+
+                        <div class="aspect-video bg-black rounded-lg flex items-center justify-center relative mb-4 overflow-hidden">
+
+                            <div id="tv-main-player-wrapper" class="w-full h-full">
+
+                                <iframe
+
+                                    id="tv-main-player"
+
+                                    class="w-full h-full"
+
+                                    src=""
+
+                                    title="TV.RuslanMV Live Broadcast"
+
+                                    frameborder="0"
+
+                                    loading="lazy"
+
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+
+                                    allowfullscreen>
+
+                                </iframe>
+
+                                <div id="tv-main-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+
+                                    <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+
+                                        <i class="fas fa-play text-white text-xl"></i>
+
+                                    </div>
+
+                                    <p class="text-primary font-bold">LIVE STREAM INITIALIZING</p>
+
+                                    <p class="text-gray-400 text-sm">Connecting to latest AI-generated episode...</p>
+
+                                </div>
+
+                            </div>
+
+                            <div class="absolute bottom-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+
+                                LIVE
+
+                            </div>
+
+                        </div>
+
+                        <div class="mt-2">
+
+                            <h4 class="font-bold text-xl mb-1 text-gray-900">PRIMARY BROADCAST</h4>
+
+                            <p class="text-gray-600">Global News Coverage with Advanced Analytics</p>
+
+                        </div>
+
+
+
+                        <!-- Side Streams -->
+
+                        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                            <div class="glass-effect rounded-xl p-4">
+
+                                <div class="aspect-video bg-gray-100 rounded-lg mb-2"></div>
+
+                                <p class="font-bold text-gray-900">TECH NEWS FEED</p>
+
+                                <p class="text-gray-600 text-sm">Real-time technology updates</p>
+
+                            </div>
+
+                            <div class="glass-effect rounded-xl p-4">
+
+                                <div class="aspect-video bg-gray-100 rounded-lg mb-2"></div>
+
+                                <p class="font-bold text-gray-900">MARKET UPDATES</p>
+
+                                <p class="text-gray-600 text-sm">Financial markets and business news</p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Sidebar Stats / Info -->
+
+                    <div class="space-y-4">
+
+                        <!-- AI Anchor Slides -->
+
+                        <div class="glass-effect rounded-xl p-6 relative overflow-hidden" id="ai-slides-card">
+
+                            <div class="flex items-center justify-between mb-4">
+
+                                <div>
+
+                                    <p class="text-xs font-semibold text-primary mb-1">AI ANCHOR</p>
+
+                                    <h4 class="font-orbitron text-lg font-bold text-gray-900">AURORA · Synthetic Host</h4>
+
+                                </div>
+
+                                <div class="relative w-10 h-10 rounded-full bg-gradient-to-tr from-neon-blue to-neon-pink flex items-center justify-center">
+
+                                    <div class="flex items-end space-x-1 h-5">
+
+                                        <span class="w-1 ai-eq-bar"></span>
+
+                                        <span class="w-1 ai-eq-bar"></span>
+
+                                        <span class="w-1 ai-eq-bar"></span>
+
+                                        <span class="w-1 ai-eq-bar"></span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div id="ai-slide-content" class="space-y-2">
+
+                                <p class="text-xs text-gray-500 uppercase tracking-widest">LIVE SEGMENT</p>
+
+                                <p class="text-base font-bold text-gray-900" id="ai-slide-title">Initializing AI briefing...</p>
+
+                                <p class="text-sm text-gray-600" id="ai-slide-summary">Connecting to real-time technology headlines.</p>
+
+                            </div>
+
+                            <div class="mt-4 relative overflow-hidden rounded-lg h-32 bg-gray-100" id="ai-slide-image-wrapper">
+
+                                <img id="ai-slide-image" src="https://source.unsplash.com/featured/400x240/?ai,technology" alt="AI slide" class="w-full h-full object-cover" loading="lazy">
+
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+
+                                <p class="absolute bottom-2 left-3 text-[10px] font-mono text-gray-200 uppercase tracking-[0.2em]" id="ai-slide-tag">AI • GLOBAL BRIEFING</p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="glass-effect rounded-xl p-6">
+
+                            <p class="text-sm font-semibold text-primary mb-1">PRIMARY CHANNEL</p>
+
+                            <p class="text-3xl font-orbitron font-bold text-gray-900">15.2K</p>
+
+                            <p class="text-gray-600 text-sm">Current viewers</p>
+
+                        </div>
+
+                        <div class="glass-effect rounded-xl p-6">
+
+                            <p class="text-sm font-semibold text-primary mb-1">TECH FEED</p>
+
+                            <p class="text-3xl font-orbitron font-bold text-gray-900">8.7K</p>
+
+                            <p class="text-gray-600 text-sm">Current viewers</p>
+
+                        </div>
+
+                        <div class="glass-effect rounded-xl p-6">
+
+                            <p class="text-sm font-semibold text-primary mb-1">BUSINESS FEED</p>
+
+                            <p class="text-3xl font-orbitron font-bold text-gray-900">12.4K</p>
+
+                            <p class="text-gray-600 text-sm">Current viewers</p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- Stats Section -->
+
+        <section class="py-16">
+
+            <div class="container mx-auto px-4">
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+
+                    <div class="glass-effect rounded-xl p-6">
+
+                        <div class="text-3xl font-orbitron font-bold text-primary mb-2">24/7</div>
+
+                        <p class="text-gray-600">Live Coverage</p>
+
+                    </div>
+
+                    <div class="glass-effect rounded-xl p-6">
+
+                        <div class="text-3xl font-orbitron font-bold text-accent mb-2">150+</div>
+
+                        <p class="text-gray-600">Countries Reached</p>
+
+                    </div>
+
+                    <div class="glass-effect rounded-xl p-6">
+
+                        <div class="text-3xl font-orbitron font-bold text-primary mb-2">5M+</div>
+
+                        <p class="text-gray-600">Daily Viewers</p>
+
+                    </div>
+
+                    <div class="glass-effect rounded-xl p-6">
+
+                        <div class="text-3xl font-orbitron font-bold text-accent mb-2">99.9%</div>
+
+                        <p class="text-gray-600">Uptime</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- Footer -->
+
+    <footer class="bg-white border-t border-gray-200">
+
+        <div class="container mx-auto px-4 py-12">
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+                <!-- Company Info -->
+
+                <div class="md:col-span-2">
+
+                    <div class="flex items-center space-x-3 mb-4">
+
+                        <div class="w-10 h-10 bg-gradient-to-r from-neon-blue to-neon-pink rounded-full"></div>
+
+                        <h4 class="font-orbitron text-xl font-bold text-gray-900">TV.RUSLANMV</h4>
+
+                    </div>
+
+                    <p class="text-gray-600 mb-6 max-w-md">
+
+                        Enterprise-grade news broadcasting with cutting-edge technology. Delivering reliable, real-time news coverage to a global audience.
+
+                    </p>
+
+                    <div class="flex space-x-4">
+
+                        <a href="#" class="w-10 h-10 glass-effect rounded-full flex items-center justify-center hover:text-primary transition-colors duration-300">
+
+                            <i class="fab fa-facebook-f"></i>
+
+                        </a>
+
+                        <a href="#" class="w-10 h-10 glass-effect rounded-full flex items-center justify-center hover:text-primary transition-colors duration-300">
+
+                            <i class="fab fa-twitter"></i>
+
+                        </a>
+
+                        <a href="#" class="w-10 h-10 glass-effect rounded-full flex items-center justify-center hover:text-primary transition-colors duration-300">
+
+                            <i class="fab fa-youtube"></i>
+
+                        </a>
+
+                        <a href="#" class="w-10 h-10 glass-effect rounded-full flex items-center justify-center hover:text-primary transition-colors duration-300">
+
+                            <i class="fab fa-linkedin-in"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Quick Links -->
+
+                <div>
+
+                    <h5 class="font-bold mb-4 text-gray-900">QUICK LINKS</h5>
+
+                    <ul class="space-y-2 text-gray-600">
+
+                        <li><a href="#" class="hover:text-primary transition-colors duration-300" onclick="event.preventDefault(); navigateTo('home')">Home</a></li>
+
+                        <li><a href="#" class="hover:text-primary transition-colors duration-300" onclick="event.preventDefault(); navigateTo('live')">Live Stream</a></li>
+
+                        <li><a href="#" class="hover:text-primary transition-colors duration-300" onclick="event.preventDefault(); navigateTo('news')">News</a></li>
+
+                        <li><a href="#" class="hover:text-primary transition-colors duration-300" onclick="event.preventDefault(); navigateTo('tech')">Technology</a></li>
+
+                    </ul>
+
+                </div>
+
+
+
+                <!-- Contact -->
+
+                <div>
+
+                    <h5 class="font-bold mb-4 text-gray-900">CONTACT</h5>
+
+                    <ul class="space-y-2 text-gray-600">
+
+                        <li class="flex items-center">
+
+                            <i class="fas fa-envelope mr-2 text-primary"></i>
+
+                            contact@tv.ruslanmv.com
+
+                        </li>
+
+                        <li class="flex items-center">
+
+                            <i class="fas fa-phone mr-2 text-primary"></i>
+
+                            +1 (555) 123-4567
+
+                        </li>
+
+                        <li class="flex items-center">
+
+                            <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+
+                            Global Broadcasting Center
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500 text-sm">
+
+                <p>&copy; 2024 TV.RuslanMV. All rights reserved. | Enterprise News Network</p>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
+    <script>
+
+        // Define navigation data
+
+        const navigationData = {
+
+            home: { title: "Home", url: "/" },
+
+            live: { title: "Live Stream", url: "/live" },
+
+            news: { title: "Latest News", url: "/news" },
+
+            tech: { title: "Technology News", url: "/tech" },
+
+            business: { title: "Business Updates", url: "/business" },
+
+            about: { title: "About Us", url: "/about" }
+
+        };
+
+
+
+        function navigateTo(page) {
+
+            const target = navigationData[page];
+
+            if (target) {
+
+                console.log("Navigating to:", target.title);
+
+                alert("Navigating to " + target.title + " - This would load: " + target.url);
+
+            }
+
+        }
+
+
+
+        // Live stream status (placeholder for future logic)
+
+        const streamStatus = {
+
+            primary: { status: "live", viewers: "15.2K" },
+
+            tech: { status: "live", viewers: "8.7K" },
+
+            business: { status: "live", viewers: "12.4K" }
+
+        };
+
+
+
+        // Initialize live player: try to load latest YouTube video from output/youtube_info.json
+
+        function initLivePlayer() {
+
+            const iframe = document.getElementById("tv-main-player");
+
+            const placeholder = document.getElementById("tv-main-placeholder");
+
+            if (!iframe) return;
+
+
+
+            const fallbackVideoId = "dQw4w9WgXcQ"; // TODO: replace with your default video or channel trailer
+
+
+
+            const setSrc = (videoId) => {
+
+                iframe.src = "https://www.youtube.com/embed/" + videoId + "?rel=0";
+
+                if (placeholder) {
+
+                    placeholder.classList.add("hidden");
+
+                }
+
+            };
+
+
+
+            fetch("/output/youtube_info.json")
+
+                .then(res => res.ok ? res.json() : Promise.reject())
+
+                .then(info => {
+
+                    if (info && info.video_id) {
+
+                        setSrc(info.video_id);
+
+                    } else {
+
+                        setSrc(fallbackVideoId);
+
+                    }
+
+                })
+
+                .catch(() => {
+
+                    setSrc(fallbackVideoId);
+
+                });
+
+        }
+
+
+
+        // Initialize AI slides (avatar + rotating slides from slides.json or fallback)
+
+        function initAiSlides() {
+
+            const titleEl = document.getElementById("ai-slide-title");
+
+            const summaryEl = document.getElementById("ai-slide-summary");
+
+            const imageEl = document.getElementById("ai-slide-image");
+
+            const tagEl = document.getElementById("ai-slide-tag");
+
+            if (!titleEl || !summaryEl || !imageEl || !tagEl) return;
+
+
+
+            const fallbackSlides = [
+
+                {
+
+                    title: "AI Transforms Global Newsrooms",
+
+                    summary: "Autonomous agents curate, verify, and narrate stories in real-time.",
+
+                    image: "https://source.unsplash.com/featured/400x240/?newsroom,ai",
+
+                    tag: "TOP STORY • AI MEDIA"
+
+                },
+
+                {
+
+                    title: "Neural Networks Monitor Space Missions",
+
+                    summary: "Deep learning systems track every metric of interplanetary launches.",
+
+                    image: "https://source.unsplash.com/featured/400x240/?space,rocket,ai",
+
+                    tag: "LIVE • SPACE & AI"
+
+                },
+
+                {
+
+                    title: "Quantum-Safe Security Arrives",
+
+                    summary: "Post-quantum cryptography moves from labs to enterprise networks.",
+
+                    image: "https://source.unsplash.com/featured/400x240/?cybersecurity,quantum",
+
+                    tag: "ALERT • CYBERSECURITY"
+
+                }
+
+            ];
+
+
+
+            function applySlide(slide) {
+
+                titleEl.textContent = slide.title;
+
+                summaryEl.textContent = slide.summary;
+
+                imageEl.src = slide.image;
+
+                tagEl.textContent = slide.tag || "AI • TECH BRIEFING";
+
+            }
+
+
+
+            function startRotation(slides) {
+
+                let idx = 0;
+
+                applySlide(slides[idx]);
+
+                setInterval(() => {
+
+                    idx = (idx + 1) % slides.length;
+
+                    applySlide(slides[idx]);
+
+                }, 8000);
+
+            }
+
+
+
+            fetch("slides.json")
+
+                .then(res => (res.ok ? res.json() : Promise.reject()))
+
+                .then(data => {
+
+                    const slides = Array.isArray(data) ? data : data.slides;
+
+                    if (slides && slides.length) {
+
+                        startRotation(slides);
+
+                    } else {
+
+                        startRotation(fallbackSlides);
+
+                    }
+
+                })
+
+                .catch(() => {
+
+                    startRotation(fallbackSlides);
+
+                });
+
+        }
+
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const ticker = document.querySelector(".animate-marquee");
+
+            if (ticker) {
+
+                setInterval(() => {
+
+                    console.log("Updating news ticker...");
+
+                }, 10000);
+
+            }
+
+
+
+            // Handle watch live buttons
+
+            document.querySelectorAll("button").forEach(button => {
+
+                if (button.textContent.includes("WATCH LIVE")) {
+
+                    button.addEventListener("click", function () {
+
+                        // Scroll to live section and focus main player
+
+                        const liveSection = document.querySelector('section.bg-gradient-to-r.from-dark.to-secondary');
+
+                        if (liveSection) {
+
+                            liveSection.scrollIntoView({ behavior: 'smooth' });
+
+                        }
+
+                    });
+
+                }
+
+            });
+
+
+
+            // Simulate real-time viewer count updates (demo)
+
+            setInterval(() => {
+
+                const viewerCounts = document.querySelectorAll(".flex.items-center.text-gray-500");
+
+                viewerCounts.forEach(element => {
+
+                    const currentCount = parseInt(element.textContent.replace(/[^0-9]/g, ""), 10);
+
+                    if (!isNaN(currentCount)) {
+
+                        const newCount = currentCount + Math.floor(Math.random() * 10);
+
+                        element.innerHTML = '<i class="fas fa-eye mr-1"></i>' + newCount.toLocaleString();
+
+                    }
+
+                });
+
+            }, 5000);
+
+
+
+            initLivePlayer();
+
+            initAiSlides();
+
+        });
+
+    </script>
+
+</body>
+
+</html>
+
