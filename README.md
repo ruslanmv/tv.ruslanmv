@@ -1,75 +1,46 @@
-# 📺 TV.RUSLANMV.COM
+# 📺 TV.RUSLANMV.COM V2 - Ollama Edition
 
-**The First TV Channel Designed for Both AI Agents and Humans**
+**The First TV Channel for AI Agents and Humans - Now with Free Local LLM!**
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](docker-compose.yml)
-[![MCP](https://img.shields.io/badge/MCP-enabled-purple.svg)](mcp-server/)
-
----
-
-## 🎬 Overview
-
-TV.RUSLANMV.COM is a revolutionary daily AI/tech news platform that delivers 10-minute episodes covering the latest in artificial intelligence, technology breakthroughs, and trending developer tools. What makes it unique? It's designed to be consumed by **both humans and AI agents**.
-
-### Key Features
-
-- 📰 **Daily AI News Episodes** - Fresh content every day at 10 AM
-- 🎥 **Professional Video Production** - AI-generated, YouTube-hosted
-- 🤖 **AI-Readable Content** - MCP (Model Context Protocol) server for AI agents
-- 📦 **Package Spotlight** - Daily featured trending tools
-- 🔍 **Searchable Archive** - Full-text search across all episodes
-- 🎨 **Retro TV Interface** - Engaging, auto-playing web experience
+[![Ollama](https://img.shields.io/badge/Ollama-Powered-blue.svg)](https://ollama.com)
+[![watsonx.ai](https://img.shields.io/badge/watsonx.ai-Optional-purple.svg)](https://www.ibm.com/watsonx)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Daily Episodes](https://img.shields.io/badge/Episodes-Daily%20@%206AM%20CET-red.svg)](https://github.com)
 
 ---
 
-## 🏗️ Architecture
+## 🎬 What's New in V2
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         USERS                                │
-│                    Humans & AI Agents                        │
-└──────────┬──────────────────────────────────┬───────────────┘
-           │                                  │
-           │ Web Browser                      │ MCP Protocol
-           ▼                                  ▼
-┌──────────────────────┐          ┌──────────────────────┐
-│   Next.js Frontend   │          │     MCP Server       │
-│   (Port 3001)        │◄─────────┤    (Port 3000)       │
-│   - TV Player UI     │          │   - AI Tools         │
-│   - Episode Browser  │          │   - Resources        │
-└──────────┬───────────┘          └──────────┬───────────┘
-           │                                  │
-           │ REST API                         │ REST API
-           ▼                                  ▼
-┌──────────────────────────────────────────────────────┐
-│              FastAPI Backend (Port 8000)              │
-│              - Episode Management                     │
-│              - Section CRUD                           │
-│              - Package Tracking                       │
-│              - Search & Analytics                     │
-└─────────┬────────────────────────────────────────────┘
-          │
-          ├─────────────┬─────────────┬──────────────┐
-          ▼             ▼             ▼              ▼
-┌──────────────┐ ┌──────────┐ ┌────────────┐ ┌──────────┐
-│  PostgreSQL  │ │  Redis   │ │  YouTube   │ │ watsonx  │
-│  Database    │ │  Cache   │ │    API     │ │   .ai    │
-└──────────────┘ └──────────┘ └────────────┘ └──────────┘
+### 🆓 **Ollama as Default LLM**
+- **FREE** local AI inference
+- No API costs for development
+- Perfect for CI/CD workflows
+- Fast model: `gemma:2b` (default)
+- Better quality: `llama3.1:8b`, `mistral:7b`
 
-┌─────────────────────────────────────────────────────────────┐
-│                     CONTENT PIPELINE                         │
-│                     (Daily Execution)                        │
-└─────────────────────────────────────────────────────────────┘
-           │
-           ▼
-┌──────────────────────┐          ┌──────────────────────┐
-│  Content Generator   │          │  Video Processor     │
-│  (CrewAI + watsonx)  │─────────►│  (FFmpeg + TTS)      │
-│  - News Research     │          │  - Video Generation  │
-│  - Script Writing    │          │  - YouTube Upload    │
-│  - Package Analysis  │          │                      │
-└──────────────────────┘          └──────────────────────┘
+### ⭐ **Optional watsonx.ai**
+- Premium quality when you need it
+- Just set `NEWS_LLM_MODEL=watsonx/ibm/granite-13b-chat-v2`
+- Seamless switching between providers
+
+### 🤖 **GitHub Actions Automation**
+- Fully automated daily video generation
+- Runs at **6 AM CET** every day
+- Uses free Ollama in CI
+- Uploads directly to YouTube
+- Zero manual intervention
+
+### 📊 **Smart LLM Selection**
+```python
+# Default: Free local Ollama
+NEWS_LLM_MODEL=ollama/gemma:2b
+
+# Better quality: Optional watsonx.ai
+NEWS_LLM_MODEL=watsonx/ibm/granite-13b-chat-v2
+
+# Alternative: OpenAI or Anthropic
+NEWS_LLM_MODEL=openai/gpt-4o-mini
+NEWS_LLM_MODEL=anthropic/claude-3-5-sonnet-latest
 ```
 
 ---
@@ -77,384 +48,312 @@ TV.RUSLANMV.COM is a revolutionary daily AI/tech news platform that delivers 10-
 ## 🚀 Quick Start
 
 ### Prerequisites
-
 - Docker & Docker Compose
-- Node.js 18+ (for local development)
-- Python 3.11+ (for local development)
-- IBM watsonx.ai API Key
-- YouTube API credentials
+- **That's it!** No API keys needed for local development
 
-### 1. Clone Repository
+### 1. Clone & Setup
 
 ```bash
 git clone https://github.com/ruslanmv/tv.ruslanmv.com.git
 cd tv.ruslanmv.com
-```
-
-### 2. Environment Setup
-
-```bash
 cp .env.example .env
-# Edit .env with your credentials
 ```
 
-Required environment variables:
-
-```env
-# Database
-DATABASE_URL=postgresql://tvuser:changeme123@postgres:5432/tvruslanmv
-
-# watsonx.ai
-WATSONX_API_KEY=your_watsonx_api_key
-WATSONX_PROJECT_ID=your_project_id
-WATSONX_URL=https://us-south.ml.cloud.ibm.com
-
-# YouTube
-YOUTUBE_API_KEY=your_youtube_api_key
-YOUTUBE_CLIENT_ID=your_client_id
-YOUTUBE_CLIENT_SECRET=your_client_secret
-YOUTUBE_REFRESH_TOKEN=your_refresh_token
-
-# Optional: Text-to-Speech
-ELEVENLABS_API_KEY=your_elevenlabs_key
-OPENAI_API_KEY=your_openai_key
-
-# Frontend
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_MCP_WS_URL=ws://localhost:3000
-```
-
-### 3. Start Services
+### 2. Start Everything
 
 ```bash
-# Start all services with Docker Compose
+# Start all services (includes Ollama)
 docker-compose up -d
 
-# Or use Makefile
-make up
+# Setup Ollama models
+docker-compose --profile setup up ollama-setup
 
-# View logs
-docker-compose logs -f
+# Wait for Ollama to be ready
+curl http://localhost:11434/api/tags
 ```
 
-### 4. Access the Platform
-
-- **Web Interface**: http://localhost:3001
-- **API Documentation**: http://localhost:8000/docs
-- **MCP Server**: stdio://localhost:3000
-
-### 5. Generate First Episode
+### 3. Generate Your First Episode
 
 ```bash
-# Run content generator
-docker-compose run --rm content-generator python src/main.py --generate-episode
+# Manual generation
+docker-compose run --rm content-generator python scripts/generate_script.py
 
-# Or using Makefile
-make generate-episode
+# View logs
+docker-compose logs -f content-generator
 ```
+
+### 4. Access Your TV Channel
+- **Frontend**: http://localhost:3001
+- **API Docs**: http://localhost:8000/docs
+- **Ollama**: http://localhost:11434
 
 ---
 
-## 📦 Project Structure
+## 🎯 LLM Configuration
+
+### Default: Ollama (Free & Local)
+
+```env
+# .env
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=gemma:2b
+NEWS_LLM_MODEL=ollama/gemma:2b
+```
+
+**Available Models:**
+- `gemma:2b` - Fast, small (DEFAULT)
+- `llama3.1:8b` - Better quality
+- `mistral:7b` - Alternative
+
+### Optional: watsonx.ai (Better Quality)
+
+```env
+# .env
+NEWS_LLM_MODEL=watsonx/ibm/granite-13b-chat-v2
+WATSONX_APIKEY=your_api_key
+WATSONX_PROJECT_ID=your_project_id
+WATSONX_URL=https://us-south.ml.cloud.ibm.com
+```
+
+Get API key: https://cloud.ibm.com/
+
+**Available Models:**
+- `watsonx/ibm/granite-13b-chat-v2` - IBM's model
+- `watsonx/meta-llama/llama-3-1-70b-instruct` - Best quality
+- `watsonx/ibm/granite-20b-multilingual` - Multilingual
+
+---
+
+## 🤖 GitHub Actions Workflow
+
+### Automated Daily Episodes
+
+The workflow runs **every day at 6 AM CET** and:
+
+1. ✅ **Setup** - Python, FFmpeg, Ollama
+2. 📰 **Fetch News** - Latest AI/tech news
+3. 📦 **Analyze Packages** - Trending tools
+4. ✍️ **Generate Script** - Using CrewAI + LLM
+5. 🎤 **Create Audio** - Text-to-speech
+6. 🎨 **Generate Video** - Visuals + subtitles
+7. 📤 **Upload YouTube** - Automatic publishing
+8. 💾 **Update Database** - Episode metadata
+9. 🌐 **Deploy Website** - GitHub Pages
+
+### Setup GitHub Actions
+
+1. **Fork the repository**
+
+2. **Add GitHub Secrets:**
+   ```
+   # Required for YouTube upload
+   YOUTUBE_CLIENT_ID
+   YOUTUBE_CLIENT_SECRET
+   YOUTUBE_REFRESH_TOKEN
+   YOUTUBE_API_KEY
+   
+   # Required for TTS
+   ELEVENLABS_API_KEY  # or OPENAI_API_KEY
+   
+   # Optional: Better quality
+   WATSONX_APIKEY
+   WATSONX_PROJECT_ID
+   WATSONX_URL
+   
+   # Optional: Database
+   DATABASE_URL
+   ```
+
+3. **Enable GitHub Actions**
+   - Go to Actions tab
+   - Enable workflows
+
+4. **Manual Trigger** (optional)
+   - Actions → "📺 Daily AI News Video Generation"
+   - Click "Run workflow"
+
+---
+
+## 📁 Project Structure
 
 ```
 tv.ruslanmv.com/
-├── frontend/              # Next.js TV interface
-│   ├── src/
-│   │   ├── app/           # App router pages
-│   │   ├── components/    # React components
-│   │   │   ├── TVPlayer/  # Main TV player
-│   │   │   ├── EpisodeList/
-│   │   │   └── Sections/
-│   │   └── lib/           # Utilities
-│   └── package.json
-│
-├── backend/               # FastAPI REST API
-│   ├── app/
-│   │   ├── api/v1/        # API endpoints
-│   │   ├── models/        # Database models
-│   │   ├── schemas/       # Pydantic schemas
-│   │   └── services/      # Business logic
-│   └── requirements.txt
-│
-├── mcp-server/            # MCP server for AI agents
-│   ├── src/
-│   │   ├── tools/         # MCP tools
-│   │   └── resources/     # MCP resources
-│   └── package.json
-│
-├── content-generator/     # AI content generation
-│   ├── src/
-│   │   ├── agents/        # CrewAI agents
-│   │   ├── crews/         # Crew definitions
-│   │   ├── tasks/         # Task definitions
-│   │   └── tools/         # Custom tools
-│   └── requirements.txt
-│
-├── video-processor/       # Video generation & upload
-│   ├── src/
-│   │   ├── generators/    # TTS, video generation
-│   │   ├── editors/       # Video editing
-│   │   └── uploader/      # YouTube uploader
-│   └── requirements.txt
-│
-├── database/              # Database files
-│   ├── schema.sql         # Database schema
-│   └── migrations/        # Alembic migrations
-│
-└── docker-compose.yml     # Docker orchestration
-```
-
----
-
-## 🎯 Episode Structure
-
-Each 10-minute episode follows this structure:
-
-| Section | Duration | Content |
-|---------|----------|---------|
-| **Opening** | 30s | Channel intro, date, episode number |
-| **AI News** | 3min | Top 3-5 AI stories of the day |
-| **Tech Breakthroughs** | 2min | Latest technology developments |
-| **Deep Dive** | 2.5min | Featured story analysis |
-| **Research Papers** | 1min | Notable AI research |
-| **Package of the Day** | 1min | Trending tool spotlight |
-| **Closing** | 30s | Summary and call-to-action |
-
----
-
-## 🤖 MCP Integration for AI Agents
-
-### Available Tools
-
-1. **`get_today_episode`**
-   - Fetches today's episode with all sections
-   - Returns structured JSON
-
-2. **`get_episode`**
-   - Retrieves specific episode by ID
-   - Optional transcript inclusion
-
-3. **`get_section`**
-   - Gets specific section (news, tech, deepdive, research, packages)
-   - Returns section content and metadata
-
-4. **`search_episodes`**
-   - Full-text search across episodes
-   - Date range filtering
-
-5. **`get_trending_packages`**
-   - Lists current trending tools
-   - Includes GitHub stars, PyPI downloads
-
-6. **`get_package_of_day`**
-   - Featured package with usage examples
-
-### Usage Example
-
-```json
-// Claude Desktop config.json
-{
-  "mcpServers": {
-    "tv-ruslanmv": {
-      "command": "node",
-      "args": ["/path/to/tv.ruslanmv.com/mcp-server/dist/index.js"],
-      "env": {
-        "API_BASE_URL": "http://localhost:8000"
-      }
-    }
-  }
-}
-```
-
-### AI Agent Example
-
-```python
-# Using MCP in Python
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
-
-async def get_ai_news():
-    server_params = StdioServerParameters(
-        command="node",
-        args=["./mcp-server/dist/index.js"]
-    )
-    
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            # Get today's episode
-            result = await session.call_tool(
-                "get_today_episode",
-                {"include_transcript": True}
-            )
-            return result
+├── .github/
+│   └── workflows/
+│       └── daily-video.yml          # GitHub Actions workflow
+├── scripts/
+│   ├── llm_client.py                # LLM abstraction (Ollama/watsonx)
+│   ├── generate_script.py           # CrewAI script generation
+│   ├── fetch_news.py                # News scraping
+│   ├── analyze_packages.py          # Package tracking
+│   ├── generate_audio.py            # TTS generation
+│   ├── generate_video.py            # Video assembly
+│   ├── upload_youtube.py            # YouTube uploader
+│   ├── setup-ollama.sh              # Ollama model setup
+│   └── requirements.txt             # Python dependencies
+├── docker-compose.yml               # Includes Ollama service
+├── .env.example                     # Environment template
+└── README.md                        # This file
 ```
 
 ---
 
 ## 🛠️ Development
 
-### Local Development Setup
+### Local Development
 
 ```bash
-# Install dependencies
-make install
+# Start services
+docker-compose up -d
 
-# Start development servers
-make dev
+# Test Ollama
+curl http://localhost:11434/api/generate \
+  -d '{
+    "model": "gemma:2b",
+    "prompt": "Hello, world!",
+    "stream": false
+  }'
 
-# Run tests
-make test
+# Generate script
+docker-compose run --rm content-generator \
+  python scripts/generate_script.py
 
-# Lint code
-make lint
+# View logs
+docker-compose logs -f ollama
+docker-compose logs -f content-generator
 ```
 
-### Database Management
+### Test LLM Client
 
 ```bash
-# Create migration
-make migrate-create name="add_new_table"
+# Test with Ollama (default)
+docker-compose run --rm content-generator \
+  python scripts/llm_client.py
 
-# Run migrations
-make migrate
-
-# Seed database
-make seed
-
-# Backup database
-make backup
+# Test with watsonx.ai
+docker-compose run --rm content-generator \
+  sh -c "NEWS_LLM_MODEL=watsonx/ibm/granite-13b-chat-v2 python scripts/llm_client.py"
 ```
 
-### Content Generation
+### Switch LLM Providers
 
 ```bash
-# Generate episode manually
-python content-generator/src/main.py --generate-episode
+# Use Ollama (default)
+NEWS_LLM_MODEL=ollama/gemma:2b
 
-# Test news scraper
-python content-generator/src/tools/news_scraper.py
+# Use watsonx.ai
+NEWS_LLM_MODEL=watsonx/ibm/granite-13b-chat-v2
 
-# Test package tracker
-python content-generator/src/tools/package_tracker.py
-```
+# Use OpenAI
+NEWS_LLM_MODEL=openai/gpt-4o-mini
 
-### Video Processing
-
-```bash
-# Generate video from script
-python video-processor/src/main.py --script output/episode_2025-01-15_script.txt
-
-# Upload to YouTube
-python video-processor/src/uploader/youtube_uploader.py --video output/episode.mp4
+# Use Anthropic
+NEWS_LLM_MODEL=anthropic/claude-3-5-sonnet-latest
 ```
 
 ---
 
-## 📊 Daily Automation
+## 📊 Costs Comparison
 
-The platform runs automatically via GitHub Actions:
+### Ollama (Default)
+- **Cost**: $0.00 FREE
+- **Setup**: Automatic
+- **Quality**: Good
+- **Speed**: Fast
+- **Use case**: Development, CI/CD
 
-**Daily Workflow** (`.github/workflows/daily-episode.yml`):
+### watsonx.ai (Optional)
+- **Cost**: ~$0.10 per episode
+- **Setup**: API key needed
+- **Quality**: Excellent
+- **Speed**: Medium
+- **Use case**: Production
 
-1. **6:00 AM UTC** - Content generator starts
-2. **7:00 AM UTC** - Script generation complete
-3. **8:00 AM UTC** - Video processing begins
-4. **9:00 AM UTC** - YouTube upload
-5. **10:00 AM UTC** - Episode goes live
-
----
-
-## 🎨 Frontend Customization
-
-### TV Frame Styling
-
-Edit `frontend/src/components/TVPlayer/TVFrame.tsx`:
-
-```tsx
-// Customize TV bezel colors
-const bezelGradient = 'linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)';
-
-// Adjust screen aspect ratio
-const aspectRatio = '16:9'; // or '4:3' for retro look
-```
-
-### Auto-Play Behavior
-
-```tsx
-// Disable auto-play
-<TVPlayer episode={episode} autoPlay={false} />
-
-// Custom overlay duration
-const overlayDuration = 5000; // 5 seconds
-```
+### OpenAI
+- **Cost**: ~$0.20 per episode
+- **Setup**: API key needed
+- **Quality**: Excellent
+- **Speed**: Fast
+- **Use case**: Alternative
 
 ---
 
-## 🔐 Security
+## 🔧 Configuration
 
-- API keys stored in environment variables
-- Database credentials never committed
-- CORS properly configured
-- Rate limiting on API endpoints
-- MCP server requires authentication (production)
-- YouTube OAuth with refresh tokens
+### Ollama Configuration
+
+```yaml
+# docker-compose.yml
+ollama:
+  image: ollama/ollama:latest
+  ports:
+    - "11434:11434"
+  volumes:
+    - ollama_data:/root/.ollama
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]  # Optional GPU acceleration
+```
+
+### GitHub Actions Configuration
+
+```yaml
+# .github/workflows/daily-video.yml
+on:
+  schedule:
+    - cron: "0 4 * * *"  # 04:00 UTC = 06:00 CET
+  workflow_dispatch:  # Manual trigger
+
+env:
+  OLLAMA_HOST: "http://127.0.0.1:11434"
+  OLLAMA_MODEL: "gemma:2b"
+  NEWS_LLM_MODEL: "ollama/gemma:2b"
+```
 
 ---
 
-## 📈 Analytics
+## 📈 Performance
 
-The platform tracks:
+### Episode Generation Times
 
-- Episode views
-- Completion rates
-- Section engagement
-- MCP API usage
-- AI agent interactions
-
-Access analytics:
-
-```bash
-# View dashboard
-http://localhost:8000/analytics
-
-# Export metrics
-make export-analytics
-```
+| LLM Provider | Average Time | Cost | Quality |
+|-------------|--------------|------|---------|
+| Ollama (gemma:2b) | 2-3 min | Free | Good |
+| Ollama (llama3.1:8b) | 5-7 min | Free | Better |
+| watsonx.ai (granite-13b) | 3-4 min | ~$0.10 | Excellent |
+| OpenAI (gpt-4o-mini) | 2-3 min | ~$0.20 | Excellent |
 
 ---
 
 ## 🚢 Deployment
 
-### Docker Production
+### Production Recommendations
 
-```bash
-# Build production images
-docker-compose -f docker-compose.prod.yml build
+1. **Use watsonx.ai** for better quality
+2. **Enable caching** for repeated requests
+3. **Monitor costs** if using paid providers
+4. **Setup alerts** for failed workflows
+5. **Backup database** regularly
 
-# Deploy
-docker-compose -f docker-compose.prod.yml up -d
+### GitHub Actions Best Practices
+
+```yaml
+# Use secrets for sensitive data
+env:
+  WATSONX_APIKEY: ${{ secrets.WATSONX_APIKEY }}
+  YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+
+# Add failure notifications
+- name: Send failure notification
+  if: failure()
+  run: |
+    curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+      -d '{"text":"❌ Episode generation failed"}'
 ```
-
-### Kubernetes
-
-```bash
-# Apply manifests
-kubectl apply -f k8s/
-
-# Check status
-kubectl get pods -n tvruslanmv
-```
-
-### Environment Variables (Production)
-
-Ensure these are set:
-
-- `ENVIRONMENT=production`
-- `DATABASE_URL=` (production database)
-- `REDIS_URL=` (production Redis)
-- Enable SSL/TLS
-- Set proper CORS origins
 
 ---
 
@@ -464,34 +363,47 @@ Contributions welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+3. Test with both Ollama and watsonx.ai
+4. Submit a pull request
 
 ---
 
 ## 📝 License
 
-MIT License - see [LICENSE](LICENSE) for details
+MIT License - see [LICENSE](LICENSE)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **IBM watsonx.ai** - LLM platform
+- **Ollama** - Free local LLM inference
+- **IBM watsonx.ai** - Enterprise AI platform
 - **CrewAI** - Multi-agent orchestration
-- **Model Context Protocol** - AI agent integration
-- **Next.js** - Frontend framework
-- **FastAPI** - Backend framework
+- **GitHub Actions** - Free CI/CD automation
 
 ---
 
 ## 📞 Support
 
-- **Documentation**: [docs.tv.ruslanmv.com](https://docs.tv.ruslanmv.com)
+- **Documentation**: Included in this repo
 - **Issues**: [GitHub Issues](https://github.com/ruslanmv/tv.ruslanmv.com/issues)
 - **Email**: support@ruslanmv.com
 
 ---
 
-**"Where AI Learns and Humans Watch"** 🤖📺👨‍💻
+## 🎯 Roadmap
+
+- [x] Ollama integration (default LLM)
+- [x] watsonx.ai support (optional)
+- [x] GitHub Actions automation
+- [x] Daily video generation at 6 AM CET
+- [ ] Multi-language support
+- [ ] Live streaming
+- [ ] Interactive AI chat
+- [ ] Mobile app
+
+---
+
+**"The First TV Channel Where AI Learns and Humans Watch - Now 100% Free!"** 🤖📺👨‍💻
+
+**Powered by Ollama | Enhanced by watsonx.ai**
