@@ -1,0 +1,18 @@
+# Video processor dependencies
+moviepy>=1.0.3
+ffmpeg-python>=0.2.0
+pillow>=10.2.0
+pydub>=0.25.1
+
+# TTS
+elevenlabs>=0.2.27
+gtts>=2.5.0
+
+# YouTube
+google-api-python-client>=2.115.0
+google-auth>=2.27.0
+google-auth-oauthlib>=1.2.0
+
+# Utilities
+requests>=2.31.0
+python-dotenv>=1.0.0
