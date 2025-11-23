@@ -1,0 +1,194 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: tvruslanmv-db
+    environment:
+      POSTGRES_DB: tvruslanmv
+      POSTGRES_USER: tvuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seeds:/docker-entrypoint-initdb.d/seeds
+    ports:
+      - "5432:5432"
+    networks:
+      - tvruslanmv-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tvuser -d tvruslanmv"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: tvruslanmv-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - tvruslanmv-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tvruslanmv-backend
+    environment:
+      DATABASE_URL: postgresql://tvuser:${DB_PASSWORD:-changeme123}@postgres:5432/tvruslanmv
+      REDIS_URL: redis://redis:6379/0
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+      WATSONX_API_KEY: ${WATSONX_API_KEY}
+      WATSONX_PROJECT_ID: ${WATSONX_PROJECT_ID}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tvruslanmv-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # MCP Server for AI Agents
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    container_name: tvruslanmv-mcp
+    environment:
+      API_BASE_URL: http://backend:8000
+      MCP_SERVER_PORT: 3000
+      NODE_ENV: ${NODE_ENV:-development}
+    volumes:
+      - ./mcp-server:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - tvruslanmv-network
+    command: npm run dev
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: tvruslanmv-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_MCP_WS_URL: ${NEXT_PUBLIC_MCP_WS_URL:-ws://localhost:3000}
+      NEXT_PUBLIC_YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+      - mcp-server
+    networks:
+      - tvruslanmv-network
+    command: npm run dev
+
+  # Content Generator (Run manually or via cron)
+  content-generator:
+    build:
+      context: ./content-generator
+      dockerfile: Dockerfile
+    container_name: tvruslanmv-generator
+    environment:
+      DATABASE_URL: postgresql://tvuser:${DB_PASSWORD:-changeme123}@postgres:5432/tvruslanmv
+      WATSONX_API_KEY: ${WATSONX_API_KEY}
+      WATSONX_PROJECT_ID: ${WATSONX_PROJECT_ID}
+      WATSONX_URL: ${WATSONX_URL:-https://us-south.ml.cloud.ibm.com}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+    volumes:
+      - ./content-generator:/app
+      - generator_output:/app/output
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tvruslanmv-network
+    profiles:
+      - tools
+    command: python src/main.py --mode daemon
+
+  # Video Processor
+  video-processor:
+    build:
+      context: ./video-processor
+      dockerfile: Dockerfile
+    container_name: tvruslanmv-video
+    environment:
+      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID}
+      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET}
+      YOUTUBE_REFRESH_TOKEN: ${YOUTUBE_REFRESH_TOKEN}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      OUTPUT_DIR: /app/output
+    volumes:
+      - ./video-processor:/app
+      - video_output:/app/output
+      - ./video-processor/assets:/app/assets
+    networks:
+      - tvruslanmv-network
+    profiles:
+      - tools
+    command: python src/main.py --mode daemon
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: tvruslanmv-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+      - mcp-server
+    networks:
+      - tvruslanmv-network
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  generator_output:
+    driver: local
+  video_output:
+    driver: local
+
+networks:
+  tvruslanmv-network:
+    driver: bridge
