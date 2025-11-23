@@ -1,6 +1,10 @@
 version: '3.8'
 
 services:
+  # ============================================
+  # CORE INFRASTRUCTURE
+  # ============================================
+  
   # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
@@ -27,6 +31,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: tvruslanmv-redis
+    command: redis-server --appendonly yes
     ports:
       - "6379:6379"
     volumes:
@@ -39,7 +44,56 @@ services:
       timeout: 5s
       retries: 5
 
-  # FastAPI Backend
+  # ============================================
+  # OLLAMA - LOCAL LLM (DEFAULT)
+  # ============================================
+  
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tvruslanmv-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - tvruslanmv-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Ollama Model Loader (runs once to pull models)
+  ollama-setup:
+    image: ollama/ollama:latest
+    container_name: tvruslanmv-ollama-setup
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - tvruslanmv-network
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./scripts/setup-ollama.sh:/setup.sh
+    command: /bin/sh /setup.sh
+    profiles:
+      - setup
+
+  # ============================================
+  # BACKEND API
+  # ============================================
+  
   backend:
     build:
       context: ./backend
@@ -48,9 +102,18 @@ services:
     environment:
       DATABASE_URL: postgresql://tvuser:${DB_PASSWORD:-changeme123}@postgres:5432/tvruslanmv
       REDIS_URL: redis://redis:6379/0
-      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
-      WATSONX_API_KEY: ${WATSONX_API_KEY}
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma:2b}
+      NEWS_LLM_MODEL: ${NEWS_LLM_MODEL:-ollama/gemma:2b}
+      # Optional: watsonx.ai for better quality
+      WATSONX_APIKEY: ${WATSONX_APIKEY}
+      WATSONX_URL: ${WATSONX_URL}
       WATSONX_PROJECT_ID: ${WATSONX_PROJECT_ID}
+      # Optional: YouTube
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID}
+      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET}
+      YOUTUBE_REFRESH_TOKEN: ${YOUTUBE_REFRESH_TOKEN}
       ENVIRONMENT: ${ENVIRONMENT:-development}
     volumes:
       - ./backend:/app
@@ -62,11 +125,16 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
     networks:
       - tvruslanmv-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # MCP Server for AI Agents
+  # ============================================
+  # MCP SERVER FOR AI AGENTS
+  # ============================================
+  
   mcp-server:
     build:
       context: ./mcp-server
@@ -87,7 +155,10 @@ services:
       - tvruslanmv-network
     command: npm run dev
 
-  # Next.js Frontend
+  # ============================================
+  # FRONTEND
+  # ============================================
+  
   frontend:
     build:
       context: ./frontend
@@ -111,7 +182,10 @@ services:
       - tvruslanmv-network
     command: npm run dev
 
-  # Content Generator (Run manually or via cron)
+  # ============================================
+  # CONTENT GENERATOR (Manual/Scheduled)
+  # ============================================
+  
   content-generator:
     build:
       context: ./content-generator
@@ -119,16 +193,25 @@ services:
     container_name: tvruslanmv-generator
     environment:
       DATABASE_URL: postgresql://tvuser:${DB_PASSWORD:-changeme123}@postgres:5432/tvruslanmv
-      WATSONX_API_KEY: ${WATSONX_API_KEY}
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma:2b}
+      NEWS_LLM_MODEL: ${NEWS_LLM_MODEL:-ollama/gemma:2b}
+      NEWS_LLM_TEMPERATURE: ${NEWS_LLM_TEMPERATURE:-0.7}
+      # Optional: watsonx.ai
+      WATSONX_APIKEY: ${WATSONX_APIKEY}
+      WATSONX_URL: ${WATSONX_URL}
       WATSONX_PROJECT_ID: ${WATSONX_PROJECT_ID}
-      WATSONX_URL: ${WATSONX_URL:-https://us-south.ml.cloud.ibm.com}
+      # Optional: Other providers
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     volumes:
       - ./content-generator:/app
+      - ./scripts:/app/scripts
       - generator_output:/app/output
     depends_on:
       postgres:
+        condition: service_healthy
+      ollama:
         condition: service_healthy
     networks:
       - tvruslanmv-network
@@ -136,7 +219,10 @@ services:
       - tools
     command: python src/main.py --mode daemon
 
-  # Video Processor
+  # ============================================
+  # VIDEO PROCESSOR
+  # ============================================
+  
   video-processor:
     build:
       context: ./video-processor
@@ -147,6 +233,7 @@ services:
       YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET}
       YOUTUBE_REFRESH_TOKEN: ${YOUTUBE_REFRESH_TOKEN}
       ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OUTPUT_DIR: /app/output
     volumes:
       - ./video-processor:/app
@@ -158,7 +245,10 @@ services:
       - tools
     command: python src/main.py --mode daemon
 
-  # Nginx Reverse Proxy
+  # ============================================
+  # NGINX REVERSE PROXY (Optional)
+  # ============================================
+  
   nginx:
     image: nginx:alpine
     container_name: tvruslanmv-nginx
@@ -177,10 +267,16 @@ services:
     profiles:
       - production
 
+# ============================================
+# VOLUMES
+# ============================================
+
 volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  ollama_data:
     driver: local
   backend_uploads:
     driver: local
@@ -189,6 +285,37 @@ volumes:
   video_output:
     driver: local
 
+# ============================================
+# NETWORKS
+# ============================================
+
 networks:
   tvruslanmv-network:
     driver: bridge
+
+# ============================================
+# USAGE EXAMPLES
+# ============================================
+#
+# Start all services:
+#   docker-compose up -d
+#
+# Setup Ollama models:
+#   docker-compose --profile setup up ollama-setup
+#
+# Generate episode manually:
+#   docker-compose run --rm content-generator python scripts/generate_script.py
+#
+# Run content generator daemon:
+#   docker-compose --profile tools up content-generator
+#
+# View logs:
+#   docker-compose logs -f ollama
+#   docker-compose logs -f backend
+#
+# Stop all services:
+#   docker-compose down
+#
+# Clean everything:
+#   docker-compose down -v
+# ============================================

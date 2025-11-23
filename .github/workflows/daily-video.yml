@@ -1,0 +1,314 @@
+name: "📺 Daily AI News Video Generation"
+
+on:
+  schedule:
+    # Every day at 05:00 UTC (06:00 CET in winter, 05:00 CEST in summer)
+    # Adjust to 04:00 UTC for consistent 06:00 CET year-round
+    - cron: "0 4 * * *"
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  # Ollama configuration (DEFAULT)
+  OLLAMA_HOST: "http://127.0.0.1:11434"
+  OLLAMA_MODEL: "gemma:2b"
+  NEWS_LLM_MODEL: "ollama/gemma:2b"
+  NEWS_LLM_TEMPERATURE: "0.7"
+  
+  # Video configuration
+  VIDEO_DURATION: "600"  # 10 minutes
+  VIDEO_RESOLUTION: "1920x1080"
+  VIDEO_FPS: "30"
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ============================================
+      # 1. SETUP ENVIRONMENT
+      # ============================================
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+      
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scripts/requirements.txt
+      
+      - name: 🎬 Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version
+      
+      # ============================================
+      # 2. SETUP OLLAMA (DEFAULT LLM)
+      # ============================================
+      - name: ⚙️ Install Ollama
+        run: |
+          echo "Installing Ollama for local LLM inference..."
+          curl -fsSL https://ollama.com/install.sh | sh
+          echo "✅ Ollama installed successfully"
+      
+      - name: 🧠 Start Ollama service & pull model
+        run: |
+          echo "Starting Ollama server..."
+          ollama serve > ollama.log 2>&1 &
+          
+          # Wait for Ollama to be ready
+          echo "Waiting for Ollama to start..."
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:11434/api/tags > /dev/null 2>&1; then
+              echo "✅ Ollama is ready!"
+              break
+            fi
+            echo "  Attempt $i/30..."
+            sleep 2
+          done
+          
+          # Pull the model
+          echo "Pulling Ollama model: $OLLAMA_MODEL"
+          ollama pull $OLLAMA_MODEL
+          
+          # Verify model is available
+          echo "Available models:"
+          ollama list
+          
+          echo "✅ Ollama setup complete!"
+      
+      - name: 🧪 Test Ollama connection
+        run: |
+          echo "Testing Ollama API..."
+          curl -X POST http://127.0.0.1:11434/api/generate \
+            -H "Content-Type: application/json" \
+            -d '{
+              "model": "'$OLLAMA_MODEL'",
+              "prompt": "Say hello",
+              "stream": false
+            }' || echo "Warning: Ollama test failed"
+      
+      # ============================================
+      # 3. GENERATE CONTENT
+      # ============================================
+      - name: 📰 Fetch AI news data
+        env:
+          # Optional: watsonx.ai for better quality (if secrets set)
+          WATSONX_APIKEY: ${{ secrets.WATSONX_APIKEY }}
+          WATSONX_URL: ${{ secrets.WATSONX_URL }}
+          WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
+          # Optional: Other providers
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          echo "📰 Fetching latest AI/tech news from RSS feeds..."
+          python scripts/fetch_news.py
+          echo "✅ News data fetched successfully"
+      
+      - name: 🔍 Analyze trending packages
+        run: |
+          echo "📦 Analyzing trending Python packages and AI tools..."
+          python scripts/analyze_packages.py
+          echo "✅ Package analysis complete"
+      
+      - name: ✍️ Generate episode script
+        env:
+          WATSONX_APIKEY: ${{ secrets.WATSONX_APIKEY }}
+          WATSONX_URL: ${{ secrets.WATSONX_URL }}
+          WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
+        run: |
+          echo "✍️ Generating TV episode script using CrewAI..."
+          python scripts/generate_script.py
+          
+          # Check if script was generated
+          if [ -f "output/episode_script.txt" ]; then
+            echo "✅ Script generated successfully"
+            echo "Script length: $(wc -l < output/episode_script.txt) lines"
+          else
+            echo "❌ Script generation failed"
+            exit 1
+          fi
+      
+      # ============================================
+      # 4. GENERATE VIDEO
+      # ============================================
+      - name: 🎤 Generate audio (TTS)
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "🎤 Generating voice narration..."
+          python scripts/generate_audio.py
+          
+          if [ -f "output/episode_audio.mp3" ]; then
+            echo "✅ Audio generated successfully"
+            ls -lh output/episode_audio.mp3
+          else
+            echo "❌ Audio generation failed"
+            exit 1
+          fi
+      
+      - name: 🎨 Generate video with visuals
+        run: |
+          echo "🎨 Creating video with visuals, transitions, and subtitles..."
+          python scripts/generate_video.py
+          
+          if [ -f "output/episode_video.mp4" ]; then
+            echo "✅ Video generated successfully"
+            ls -lh output/episode_video.mp4
+            
+            # Get video info
+            ffprobe -v quiet -print_format json -show_format -show_streams output/episode_video.mp4
+          else
+            echo "❌ Video generation failed"
+            exit 1
+          fi
+      
+      # ============================================
+      # 5. UPLOAD TO YOUTUBE
+      # ============================================
+      - name: 📤 Upload to YouTube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          echo "📤 Uploading video to YouTube..."
+          python scripts/upload_youtube.py
+          
+          # Save video ID and URL
+          if [ -f "output/youtube_info.json" ]; then
+            echo "✅ Video uploaded successfully"
+            cat output/youtube_info.json
+            
+            # Extract YouTube URL
+            YOUTUBE_URL=$(python -c "import json; print(json.load(open('output/youtube_info.json'))['url'])")
+            echo "YouTube URL: $YOUTUBE_URL"
+            echo "YOUTUBE_URL=$YOUTUBE_URL" >> $GITHUB_ENV
+          else
+            echo "❌ YouTube upload failed"
+            exit 1
+          fi
+      
+      # ============================================
+      # 6. UPDATE DATABASE & WEBSITE
+      # ============================================
+      - name: 💾 Save episode to database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "💾 Saving episode metadata to database..."
+          python scripts/save_episode.py
+          echo "✅ Episode saved to database"
+      
+      - name: 📝 Update website
+        run: |
+          echo "📝 Generating episode page..."
+          python scripts/generate_episode_page.py
+          
+          # Copy to GitHub Pages
+          cp output/episode.html docs/episodes/latest.html
+          echo "✅ Website updated"
+      
+      - name: 📊 Generate analytics report
+        run: |
+          echo "📊 Generating daily analytics..."
+          python scripts/generate_analytics.py
+          echo "✅ Analytics generated"
+      
+      # ============================================
+      # 7. COMMIT & DEPLOY
+      # ============================================
+      - name: 💾 Commit generated content
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "📺 Daily AI News Episode - $(date +'%Y-%m-%d')"
+          file_pattern: |
+            data/episodes/*.json
+            docs/episodes/*.html
+            output/*.json
+          commit_user_name: "TVRuslanmvBot"
+          commit_user_email: "actions@github.com"
+      
+      - name: 🚀 Deploy to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          cname: tv.ruslanmv.com
+      
+      # ============================================
+      # 8. NOTIFICATIONS
+      # ============================================
+      - name: 📧 Send success notification
+        if: success()
+        run: |
+          echo "✅ Daily episode generated and published successfully!"
+          echo "📺 Episode available at: $YOUTUBE_URL"
+          echo "🌐 Website updated at: https://tv.ruslanmv.com"
+          
+          # Optional: Send to Slack/Discord
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"✅ New episode published: '$YOUTUBE_URL'"}'
+      
+      - name: ❌ Send failure notification
+        if: failure()
+        run: |
+          echo "❌ Episode generation failed. Check logs for details."
+          
+          # Optional: Send alert
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-Type: application/json' \
+          #   -d '{"text":"❌ Episode generation failed. Check GitHub Actions logs."}'
+      
+      # ============================================
+      # 9. CLEANUP
+      # ============================================
+      - name: 🧹 Upload artifacts for debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: episode-artifacts-${{ github.run_number }}
+          path: |
+            output/
+            ollama.log
+          retention-days: 7
+      
+      - name: 🧹 Cleanup temporary files
+        if: always()
+        run: |
+          echo "Cleaning up..."
+          rm -f output/*.tmp
+          echo "✅ Cleanup complete"
+
+# ============================================
+# WORKFLOW SUMMARY
+# ============================================
+# This workflow runs daily at 06:00 CET and:
+# 1. Sets up Python, FFmpeg, and Ollama (local LLM)
+# 2. Fetches latest AI/tech news and trending packages
+# 3. Generates episode script using CrewAI + Ollama
+# 4. Creates video with TTS narration and visuals
+# 5. Uploads to YouTube
+# 6. Updates database and website
+# 7. Deploys to GitHub Pages
+# 8. Sends notifications
+#
+# Optional: Use watsonx.ai for better quality by setting:
+#   NEWS_LLM_MODEL: watsonx/ibm/granite-13b-chat-v2
+# ============================================
