@@ -179,7 +179,27 @@ jobs:
       # ============================================
       # 5. UPLOAD TO YOUTUBE
       # ============================================
+      - name: 🔍 Check YouTube credentials
+        id: check_youtube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          if [ -n "$YOUTUBE_CLIENT_ID" ] && [ -n "$YOUTUBE_CLIENT_SECRET" ] && [ -n "$YOUTUBE_REFRESH_TOKEN" ]; then
+            echo "✅ YouTube credentials found - upload will proceed"
+            echo "upload_enabled=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  YouTube credentials not configured - skipping upload"
+            echo "⚠️  Missing credentials:"
+            [ -z "$YOUTUBE_CLIENT_ID" ] && echo "  - YOUTUBE_CLIENT_ID"
+            [ -z "$YOUTUBE_CLIENT_SECRET" ] && echo "  - YOUTUBE_CLIENT_SECRET"
+            [ -z "$YOUTUBE_REFRESH_TOKEN" ] && echo "  - YOUTUBE_REFRESH_TOKEN"
+            echo "upload_enabled=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: 📤 Upload to YouTube
+        if: steps.check_youtube.outputs.upload_enabled == 'true'
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
@@ -187,12 +207,12 @@ jobs:
         run: |
           echo "📤 Uploading video to YouTube..."
           python scripts/upload_youtube.py
-          
+
           # Save video ID and URL
           if [ -f "output/youtube_info.json" ]; then
             echo "✅ Video uploaded successfully"
             cat output/youtube_info.json
-            
+
             # Extract YouTube URL
             YOUTUBE_URL=$(python -c "import json; print(json.load(open('output/youtube_info.json'))['url'])")
             echo "YouTube URL: $YOUTUBE_URL"
@@ -258,9 +278,13 @@ jobs:
         if: success()
         run: |
           echo "✅ Daily episode generated and published successfully!"
-          echo "📺 Episode available at: $YOUTUBE_URL"
+          if [ -n "$YOUTUBE_URL" ]; then
+            echo "📺 Episode available at: $YOUTUBE_URL"
+          else
+            echo "📺 Video generated locally (YouTube upload skipped - credentials not configured)"
+          fi
           echo "🌐 Website updated at: https://tv.ruslanmv.com"
-          
+
           # Optional: Send to Slack/Discord
           # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
           #   -H 'Content-Type: application/json' \
