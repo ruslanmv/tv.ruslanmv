@@ -2,12 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================================================== */
+/* Fonts                                                                      */
+/* ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css");
+
+/* ========================================================================== */
+/* Root tokens: dark background + marketing theme                             */
+/* ========================================================================== */
+
 :root {
+  /* Old TV gradient tokens */
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 26, 26, 46;
   --background-end-rgb: 15, 52, 96;
+
+  /* Light marketing theme tokens */
+  --mm-bg: #f5f5f5;
+  --mm-surface: #ffffff;
+  --mm-border: #e8e8e8;
+  --mm-text: #111111;
+  --mm-text-muted: #6c757d;
+  --mm-accent: #2a7ae2;
+  --mm-accent-dark: #205caa;
 }
 
+/* Default body background (TV style). Individual pages can override. */
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -18,74 +40,21 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-@layer utilities {
-  .bg-scanlines {
-    background-image: repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.15),
-      rgba(0, 0, 0, 0.15) 1px,
-      transparent 1px,
-      transparent 2px
-    );
-  }
-
-  .animate-blob {
-    animation: blob 7s infinite;
-  }
-
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-}
-
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
-/* =============================================================================
- * TV.RuslanMV theme (landing page)
- * - Fonts: Orbitron + Inter
- * - Colors: primary / secondary / accent
- * - Utilities: gradient-bg, glass-effect, news-ticker, marquee, etc.
- * ============================================================================= */
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
-
-:root {
-  --mm-bg: #f5f5f5;
-  --mm-surface: #ffffff;
-  --mm-border: #e8e8e8;
-  --mm-text: #111111;
-  --mm-text-muted: #6c757d;
-  --mm-accent: #2a7ae2;
-  --mm-accent-dark: #205caa;
-}
+/* ========================================================================== */
+/* Typography helpers                                                         */
+/* ========================================================================== */
 
 .font-orbitron {
-  font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 
 .font-inter {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 
-/* Map some custom token-style classes to real colors */
+/* Map custom token-style classes to real colors */
 .bg-secondary {
   background-color: var(--mm-bg);
 }
@@ -105,7 +74,7 @@ body {
 /* Gradient helpers used by the landing page */
 .from-neon-blue {
   --tw-gradient-from: #2a7ae2 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgba(42,122,226,0) var(--tw-gradient-to-position);
+  --tw-gradient-to: rgba(42, 122, 226, 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -113,15 +82,26 @@ body {
   --tw-gradient-to: #205caa var(--tw-gradient-to-position);
 }
 
-/* Layout helpers */
+/* ========================================================================== */
+/* Layout / visual helpers                                                    */
+/* ========================================================================== */
+
+/* Light marketing background */
 .gradient-bg {
   background: linear-gradient(180deg, #f5f5f5 0%, #ffffff 40%, #f5f5f5 100%);
 }
 
+/* Breaking-news ticker bar */
 .news-ticker {
-  background: linear-gradient(90deg, transparent, rgba(42, 122, 226, 0.15), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(42, 122, 226, 0.15),
+    transparent
+  );
 }
 
+/* Glassy cards */
 .glass-effect {
   background: var(--mm-surface);
   backdrop-filter: none;
@@ -129,23 +109,105 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
-/* Simple marquee animation */
+/* ========================================================================== */
+/* Utility layer: blobs, scanlines, delays                                    */
+/* ========================================================================== */
+
+@layer utilities {
+  /* Scanline overlay (used on TV background) */
+  .bg-scanlines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.06) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}
+
+/* Organic blob movement for background shapes */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+/* ========================================================================== */
+/* Marquee ticker                                                             */
+/* ========================================================================== */
+
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
 
-/* Optional scanline-style background */
-.bg-scanlines {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.06),
-    rgba(255,255,255,0.06) 1px,
-    transparent 1px,
-    transparent 3px
+/* ========================================================================== */
+/* AI equalizer bars for synthetic anchor                                     */
+/* ========================================================================== */
+
+.ai-eq-bar {
+  display: inline-block;
+  height: 8px;
+  background: linear-gradient(
+    to top,
+    rgba(42, 122, 226, 0.1),
+    rgba(42, 122, 226, 0.9)
   );
+  border-radius: 9999px;
+  animation: ai-speaking 1s ease-in-out infinite;
+}
+
+.ai-eq-bar:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.ai-eq-bar:nth-child(3) {
+  animation-delay: 0.24s;
+}
+.ai-eq-bar:nth-child(4) {
+  animation-delay: 0.36s;
+}
+
+@keyframes ai-speaking {
+  0% {
+    height: 4px;
+    opacity: 0.6;
+  }
+  50% {
+    height: 16px;
+    opacity: 1;
+  }
+  100% {
+    height: 6px;
+    opacity: 0.7;
+  }
 }

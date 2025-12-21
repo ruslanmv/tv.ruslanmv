@@ -2,8 +2,7 @@ name: "📺 Daily AI News Video Generation"
 
 on:
   schedule:
-    # Every day at 05:00 UTC (06:00 CET in winter, 05:00 CEST in summer)
-    # Adjust to 04:00 UTC for consistent 06:00 CET year-round
+    # Every day at 04:00 UTC (~06:00 CET depending on DST)
     - cron: "0 4 * * *"
   workflow_dispatch:  # Allow manual trigger
 
@@ -41,7 +40,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: 'pip'
+          cache: "pip"
       
       - name: 📦 Install Python dependencies
         run: |
@@ -81,7 +80,7 @@ jobs:
           
           # Pull the model
           echo "Pulling Ollama model: $OLLAMA_MODEL"
-          ollama pull $OLLAMA_MODEL
+          ollama pull "$OLLAMA_MODEL"
           
           # Verify model is available
           echo "Available models:"
@@ -194,18 +193,27 @@ jobs:
             cat output/youtube_info.json
             
             # Extract YouTube URL
-            YOUTUBE_URL=$(python -c "import json; print(json.load(open('output/youtube_info.json'))['url'])")
+            YOUTUBE_URL=$(python - << 'PY'
+          import json
+          try:
+              info = json.load(open("output/youtube_info.json", "r", encoding="utf-8"))
+              print(info.get("url") or f"https://www.youtube.com/watch?v={info.get('video_id') or info.get('id')}")
+          except Exception:
+              print("https://www.youtube.com/")
+          PY
+          )
             echo "YouTube URL: $YOUTUBE_URL"
-            echo "YOUTUBE_URL=$YOUTUBE_URL" >> $GITHUB_ENV
+            echo "YOUTUBE_URL=$YOUTUBE_URL" >> "$GITHUB_ENV"
           else
-            echo "❌ YouTube upload failed"
+            echo "❌ YouTube upload failed (output/youtube_info.json missing)"
             exit 1
           fi
       
       # ============================================
-      # 6. UPDATE DATABASE & WEBSITE
+      # 6. UPDATE DATABASE & STATIC WEBSITE
       # ============================================
       - name: 💾 Save episode to database
+        if: ${{ secrets.DATABASE_URL != '' }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
@@ -213,23 +221,23 @@ jobs:
           python scripts/save_episode.py
           echo "✅ Episode saved to database"
       
-      - name: 📝 Update website
+      - name: 🧱 Update static web pages (web/)
         run: |
-          echo "📝 Generating episode page..."
-          python scripts/generate_episode_page.py
-          
-          # Copy to GitHub Pages
-          cp output/episode.html docs/episodes/latest.html
-          echo "✅ Website updated"
+          echo "🧱 Updating static site artifacts (web/output/)..."
+          python scripts/update_static_site.py
+          echo "✅ Static site updated"
       
+      # ============================================
+      # 7. ANALYTICS (OPTIONAL)
+      # ============================================
       - name: 📊 Generate analytics report
         run: |
           echo "📊 Generating daily analytics..."
-          python scripts/generate_analytics.py
-          echo "✅ Analytics generated"
+          python scripts/generate_analytics.py || echo "Analytics optional, continuing..."
+          echo "✅ Analytics step finished"
       
       # ============================================
-      # 7. COMMIT & DEPLOY
+      # 8. COMMIT & DEPLOY
       # ============================================
       - name: 💾 Commit generated content
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -237,8 +245,8 @@ jobs:
           commit_message: "📺 Daily AI News Episode - $(date +'%Y-%m-%d')"
           file_pattern: |
             data/episodes/*.json
-            docs/episodes/*.html
             output/*.json
+            web/output/*.json
           commit_user_name: "TVRuslanmvBot"
           commit_user_email: "actions@github.com"
       
@@ -247,12 +255,12 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          publish_dir: ./web
           publish_branch: gh-pages
           cname: tv.ruslanmv.com
       
       # ============================================
-      # 8. NOTIFICATIONS
+      # 9. NOTIFICATIONS
       # ============================================
       - name: 📧 Send success notification
         if: success()
@@ -260,24 +268,14 @@ jobs:
           echo "✅ Daily episode generated and published successfully!"
           echo "📺 Episode available at: $YOUTUBE_URL"
           echo "🌐 Website updated at: https://tv.ruslanmv.com"
-          
-          # Optional: Send to Slack/Discord
-          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
-          #   -H 'Content-Type: application/json' \
-          #   -d '{"text":"✅ New episode published: '$YOUTUBE_URL'"}'
       
       - name: ❌ Send failure notification
         if: failure()
         run: |
           echo "❌ Episode generation failed. Check logs for details."
-          
-          # Optional: Send alert
-          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
-          #   -H 'Content-Type: application/json' \
-          #   -d '{"text":"❌ Episode generation failed. Check GitHub Actions logs."}'
       
       # ============================================
-      # 9. CLEANUP
+      # 10. CLEANUP
       # ============================================
       - name: 🧹 Upload artifacts for debugging
         if: always()
@@ -293,22 +291,5 @@ jobs:
         if: always()
         run: |
           echo "Cleaning up..."
-          rm -f output/*.tmp
+          rm -f output/*.tmp || true
           echo "✅ Cleanup complete"
-
-# ============================================
-# WORKFLOW SUMMARY
-# ============================================
-# This workflow runs daily at 06:00 CET and:
-# 1. Sets up Python, FFmpeg, and Ollama (local LLM)
-# 2. Fetches latest AI/tech news and trending packages
-# 3. Generates episode script using CrewAI + Ollama
-# 4. Creates video with TTS narration and visuals
-# 5. Uploads to YouTube
-# 6. Updates database and website
-# 7. Deploys to GitHub Pages
-# 8. Sends notifications
-#
-# Optional: Use watsonx.ai for better quality by setting:
-#   NEWS_LLM_MODEL: watsonx/ibm/granite-13b-chat-v2
-# ============================================
