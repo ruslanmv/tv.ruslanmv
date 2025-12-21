@@ -57,23 +57,30 @@ export default function Home() {
   // Recent items are derived from the episode index (fallback to empty list)
   const recentEpisodes = useMemo(() => {
     const list = episodeIndex?.episodes ?? [];
+    if (list.length === 0) return [];
+
     // Prefer newest first when possible
-    return list
+    const sorted = list
       .slice()
       .sort((a, b) => {
         const da = Date.parse(a.published_at || a.created_at || a.date || "") || 0;
         const db = Date.parse(b.published_at || b.created_at || b.date || "") || 0;
         return db - da;
-      })
-      // Hide the current hero episode if it has the same YouTube id or same date
+      });
+
+    // Hide the current hero episode if it has the same YouTube id or same date
+    const currentYoutubeId = episode?.youtube_id;
+    const currentDate = episode?.date;
+
+    return sorted
       .filter((ep) => {
-        if (!episode) return true;
-        if (episode.youtube_id && ep.youtube_id) return ep.youtube_id !== episode.youtube_id;
-        if (episode.date && ep.date) return ep.date !== episode.date;
+        if (!currentYoutubeId && !currentDate) return true;
+        if (currentYoutubeId && ep.youtube_id && ep.youtube_id === currentYoutubeId) return false;
+        if (currentDate && ep.date && ep.date === currentDate) return false;
         return true;
       })
       .slice(0, 9);
-  }, [episodeIndex, episode]);
+  }, [episodeIndex, episode?.youtube_id, episode?.date]);
 
   return (
     <>
