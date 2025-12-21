@@ -1,17 +1,21 @@
 # --- Ignore heavy / non-Vercel parts ---
-backend/
+# backend/ - REMOVED: Vercel needs access to backend for FastAPI
 scripts/
 database/
 mcp-server/
 .docker/
 
-# IMPORTANT: prevent Vercel from detecting FastAPI/Python project at repo root
+# IMPORTANT: Allow FastAPI entrypoint and backend
+!api/
+!backend/
+!requirements.txt
+
+# Ignore Python project config (use requirements.txt instead)
 pyproject.toml
 poetry.lock
-requirements*.txt
 
-# Ignore Python artifacts (safe, since Vercel is frontend-only here)
-*.py
+# Still ignore some Python build artifacts at root
+# *.py - REMOVED: Vercel needs api/index.py
 *.pyc
 __pycache__/
 .pytest_cache/
