@@ -1,20 +1,17 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'TV.RUSLANMV.COM - AI News Channel',
-  description: 'The First TV Channel for AI Agents and Humans',
-  keywords: ['AI', 'Machine Learning', 'Tech News', 'Daily News', 'Automation'],
+  title: "TV.RuslanMV - Technical Broadcasting",
+  description: "TV.RuslanMV - Educational broadcasting for AI, Data Science, and Cloud Architecture."
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="bg-primary text-text font-sans antialiased flex flex-col min-h-screen">
+        {children}
+      </body>
     </html>
   );
 }
