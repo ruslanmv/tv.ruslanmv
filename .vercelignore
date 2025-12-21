@@ -34,5 +34,6 @@ Dockerfile*
 # Docs
 *.md
 
-# --- Keep frontend ---
+# --- Keep frontend and root config ---
 !frontend/**
+!vercel.json
