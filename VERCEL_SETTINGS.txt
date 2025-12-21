@@ -1,0 +1,37 @@
+===========================================
+VERCEL PROJECT SETTINGS - tv.ruslanmv
+===========================================
+
+GO TO: https://vercel.com/dashboard
+→ Select "tv.ruslanmv" project
+→ Settings → General
+
+BUILD & DEVELOPMENT SETTINGS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Framework Preset:      Next.js
+
+Root Directory:        frontend        ← MUST SET THIS!
+
+Build Command:         npm run build
+
+Output Directory:      .next
+
+Install Command:       npm install
+
+===========================================
+
+After saving, go to:
+→ Deployments tab
+→ Click "Redeploy" on latest deployment
+
+===========================================
+
+The 404 error will be fixed once Root Directory
+is set to "frontend".
+
+Your site structure:
+  tv.ruslanmv/
+  └── frontend/  ← Vercel needs to look HERE
+      └── (Next.js app)
+===========================================

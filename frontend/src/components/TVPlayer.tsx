@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import ReactPlayer from "react-player/youtube";
+import ReactPlayer from "react-player";
 import { FaPlay, FaUserFriends } from "react-icons/fa";
 import type { Episode, Section } from "@/lib/types";
 
@@ -37,14 +37,17 @@ export default function TVPlayer({
     return (
       <div className="bg-black rounded-lg shadow-lg overflow-hidden aspect-video relative flex items-center justify-center">
         <div className="text-center text-white/80 px-6">
-          <p className="font-semibold">No live episode available</p>
+          <p className="font-semibold">No episode available</p>
           <p className="text-sm text-white/60 mt-2">
-            Connect your backend API to display today's broadcast.
+            New episodes are generated daily at 06:00 CET
           </p>
         </div>
       </div>
     );
   }
+
+  // Production default: YouTube first. Fallback: R2 MP4 if YouTube missing/banned.
+  const videoUrl = episode.youtube_url || episode.video_url;
 
   const jumpToSection = (section: Section) => {
     playerRef.current?.seekTo(section.start_time, "seconds");
@@ -78,7 +81,7 @@ export default function TVPlayer({
 
         <ReactPlayer
           ref={playerRef}
-          url={episode.youtube_url}
+          url={videoUrl}
           playing={playing}
           controls
           width="100%"
@@ -88,7 +91,7 @@ export default function TVPlayer({
         />
       </div>
 
-      {episode.sections?.length > 0 && (
+      {episode.sections && episode.sections.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 shadow-card">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-lg flex items-center justify-between">
             <h4 className="font-bold text-sm text-text">Chapters</h4>
