@@ -224,28 +224,22 @@ jobs:
       # ============================================
       # 6. UPDATE DATABASE & WEBSITE
       # ============================================
-      - name: 💾 Save episode to database
+      - name: 💾 Save episode metadata
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          echo "💾 Saving episode metadata to database..."
+          echo "💾 Saving episode metadata..."
           python scripts/save_episode.py
-          echo "✅ Episode saved to database"
       
-      - name: 📝 Update website
+      - name: 📝 Generate episode page
         run: |
           echo "📝 Generating episode page..."
           python scripts/generate_episode_page.py
-          
-          # Copy to GitHub Pages
-          cp output/episode.html docs/episodes/latest.html
-          echo "✅ Website updated"
       
       - name: 📊 Generate analytics report
         run: |
-          echo "📊 Generating daily analytics..."
+          echo "📊 Generating analytics..."
           python scripts/generate_analytics.py
-          echo "✅ Analytics generated"
       
       # ============================================
       # 7. COMMIT & DEPLOY
