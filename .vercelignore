@@ -1,20 +1,38 @@
+# --- Ignore heavy / non-Vercel parts ---
 backend/
 scripts/
 database/
 mcp-server/
 .docker/
+
+# IMPORTANT: prevent Vercel from detecting FastAPI/Python project at repo root
+pyproject.toml
+poetry.lock
+requirements*.txt
+
+# Ignore Python artifacts (safe, since Vercel is frontend-only here)
 *.py
 *.pyc
 __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Node build artifacts
 dist/
 build/
 *.egg-info/
+
+# Secrets
 .env
 .env.local
+
+# Docker / misc
 docker-compose*.yml
 Dockerfile*
+
+# Docs
 *.md
+
+# --- Keep frontend ---
 !frontend/**
