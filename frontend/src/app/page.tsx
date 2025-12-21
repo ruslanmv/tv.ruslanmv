@@ -38,22 +38,7 @@ export default function Home() {
     })();
   }, []);
 
-  if (loading) {
-    return (
-      <main className="flex-grow flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-3xl mb-3">📺</div>
-          <p className="text-muted">Loading…</p>
-        </div>
-      </main>
-    );
-  }
-
-  const heroTitle = episode?.title ?? "Building RAG Applications with IBM watsonx.ai";
-  const heroDescription =
-    episode?.description ??
-    "Join us for a deep dive into Retrieval-Augmented Generation. Learn secure, scalable AI agent patterns, vector search, prompt engineering, and deployment strategies.";
-
+  // ✅ useMemo MUST run on every render (before any early returns)
   // Recent items are derived from the episode index (fallback to empty list)
   const recentEpisodes = useMemo(() => {
     const list = episodeIndex?.episodes ?? [];
@@ -81,6 +66,22 @@ export default function Home() {
       })
       .slice(0, 9);
   }, [episodeIndex, episode?.youtube_id, episode?.date]);
+
+  if (loading) {
+    return (
+      <main className="flex-grow flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-3xl mb-3">📺</div>
+          <p className="text-muted">Loading…</p>
+        </div>
+      </main>
+    );
+  }
+
+  const heroTitle = episode?.title ?? "Building RAG Applications with IBM watsonx.ai";
+  const heroDescription =
+    episode?.description ??
+    "Join us for a deep dive into Retrieval-Augmented Generation. Learn secure, scalable AI agent patterns, vector search, prompt engineering, and deployment strategies.";
 
   return (
     <>
