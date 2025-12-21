@@ -8,6 +8,9 @@ import json
 from pathlib import Path
 from datetime import datetime
 
+# Add scripts directory to path for imports
+SCRIPT_DIR = Path(__file__).parent
+sys.path.insert(0, str(SCRIPT_DIR))
 
 OUTPUT_DIR = Path("output")
 
