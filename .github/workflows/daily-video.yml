@@ -177,48 +177,47 @@ jobs:
           fi
       
       # ============================================
-      # 5. UPLOAD TO YOUTUBE
+      # 5. UPLOAD TO ALL PLATFORMS (YouTube + R2)
       # ============================================
-      - name: 🔍 Check YouTube credentials
-        id: check_youtube
+      - name: 📤 Upload to YouTube and Cloudflare R2
         env:
+          # YouTube credentials
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_PRIVACY_STATUS: ${{ secrets.YOUTUBE_PRIVACY_STATUS || 'public' }}
+          # Cloudflare R2 credentials (optional)
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME || 'tv-ruslanmv-videos' }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL || 'https://videos.ruslanmv.com' }}
         run: |
-          if [ -n "$YOUTUBE_CLIENT_ID" ] && [ -n "$YOUTUBE_CLIENT_SECRET" ] && [ -n "$YOUTUBE_REFRESH_TOKEN" ]; then
-            echo "✅ YouTube credentials found - upload will proceed"
-            echo "upload_enabled=true" >> $GITHUB_OUTPUT
-          else
-            echo "⚠️  YouTube credentials not configured - skipping upload"
-            echo "⚠️  Missing credentials:"
-            [ -z "$YOUTUBE_CLIENT_ID" ] && echo "  - YOUTUBE_CLIENT_ID"
-            [ -z "$YOUTUBE_CLIENT_SECRET" ] && echo "  - YOUTUBE_CLIENT_SECRET"
-            [ -z "$YOUTUBE_REFRESH_TOKEN" ] && echo "  - YOUTUBE_REFRESH_TOKEN"
-            echo "upload_enabled=false" >> $GITHUB_OUTPUT
-          fi
+          echo "📤 Uploading video to all platforms..."
+          cd scripts
+          python upload_all.py
+          cd ..
 
-      - name: 📤 Upload to YouTube
-        if: steps.check_youtube.outputs.upload_enabled == 'true'
-        env:
-          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
-          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
-          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-        run: |
-          echo "📤 Uploading video to YouTube..."
-          python scripts/upload_youtube.py
-
-          # Save video ID and URL
-          if [ -f "output/youtube_info.json" ]; then
-            echo "✅ Video uploaded successfully"
-            cat output/youtube_info.json
+          # Extract URLs from results
+          if [ -f "output/upload_results.json" ]; then
+            echo "✅ Upload complete"
+            cat output/upload_results.json
 
             # Extract YouTube URL
-            YOUTUBE_URL=$(python -c "import json; print(json.load(open('output/youtube_info.json'))['url'])")
-            echo "YouTube URL: $YOUTUBE_URL"
-            echo "YOUTUBE_URL=$YOUTUBE_URL" >> $GITHUB_ENV
+            if [ -f "output/youtube_info.json" ]; then
+              YOUTUBE_URL=$(python -c "import json; print(json.load(open('output/youtube_info.json'))['url'])")
+              echo "YouTube URL: $YOUTUBE_URL"
+              echo "YOUTUBE_URL=$YOUTUBE_URL" >> $GITHUB_ENV
+            fi
+
+            # Extract R2 URL if available
+            if [ -f "output/r2_info.json" ]; then
+              R2_URL=$(python -c "import json; print(json.load(open('output/r2_info.json'))['url'])")
+              echo "R2 URL: $R2_URL"
+              echo "R2_URL=$R2_URL" >> $GITHUB_ENV
+            fi
           else
-            echo "❌ YouTube upload failed"
+            echo "❌ Upload failed"
             exit 1
           fi
       
@@ -279,16 +278,19 @@ jobs:
         run: |
           echo "✅ Daily episode generated and published successfully!"
           if [ -n "$YOUTUBE_URL" ]; then
-            echo "📺 Episode available at: $YOUTUBE_URL"
+            echo "📺 YouTube: $YOUTUBE_URL"
           else
-            echo "📺 Video generated locally (YouTube upload skipped - credentials not configured)"
+            echo "⚠️  YouTube upload skipped (credentials not configured)"
           fi
-          echo "🌐 Website updated at: https://tv.ruslanmv.com"
+          if [ -n "$R2_URL" ]; then
+            echo "💾 R2 Backup: $R2_URL"
+          fi
+          echo "🌐 Website: https://tv.ruslanmv.com"
 
           # Optional: Send to Slack/Discord
           # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
           #   -H 'Content-Type: application/json' \
-          #   -d '{"text":"✅ New episode published: '$YOUTUBE_URL'"}'
+          #   -d '{"text":"✅ New episode published!\n📺 YouTube: '$YOUTUBE_URL'\n💾 R2: '$R2_URL'"}'
       
       - name: ❌ Send failure notification
         if: failure()

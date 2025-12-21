@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "name": "tv-ruslanmv",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@api-url",
+    "NEXT_PUBLIC_MCP_WS_URL": "@mcp-ws-url"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_API_URL": "@api-url"
+    }
+  }
+}

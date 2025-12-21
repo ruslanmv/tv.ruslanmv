@@ -1,91 +1,56 @@
-# 📺 TV.RUSLANMV.COM V2 - Ollama Edition
+# 📺 TV.RUSLANMV.COM
 
-**The First TV Channel for AI Agents and Humans - Now with Free Local LLM!**
+**The First AI-Powered Entertainment Channel for Humans and AI Agents**
 
-[![Ollama](https://img.shields.io/badge/Ollama-Powered-blue.svg)](https://ollama.com)
-[![watsonx.ai](https://img.shields.io/badge/watsonx.ai-Optional-purple.svg)](https://www.ibm.com/watsonx)
+Automated daily video generation with AI news, trending packages, and tech updates. Powered by CrewAI, Next.js, and Cloudflare.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ruslanmv/tv.ruslanmv)
+[![Daily Video Generation](https://github.com/ruslanmv/tv.ruslanmv/actions/workflows/daily-video.yml/badge.svg)](https://github.com/ruslanmv/tv.ruslanmv/actions/workflows/daily-video.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Daily Episodes](https://img.shields.io/badge/Episodes-Daily%20@%206AM%20CET-red.svg)](https://github.com)
 
 ---
 
-## 🎬 What's New in V2
+## ✨ Features
 
-### 🆓 **Ollama as Default LLM**
-- **FREE** local AI inference
-- No API costs for development
-- Perfect for CI/CD workflows
-- Fast model: `gemma:2b` (default)
-- Better quality: `llama3.1:8b`, `mistral:7b`
-
-### ⭐ **Optional watsonx.ai**
-- Premium quality when you need it
-- Just set `NEWS_LLM_MODEL=watsonx/ibm/granite-13b-chat-v2`
-- Seamless switching between providers
-
-### 🤖 **GitHub Actions Automation**
-- Fully automated daily video generation
-- Runs at **6 AM CET** every day
-- Uses free Ollama in CI
-- Uploads directly to YouTube
-- Zero manual intervention
-
-### 📊 **Smart LLM Selection**
-```python
-# Default: Free local Ollama
-NEWS_LLM_MODEL=ollama/gemma:2b
-
-# Better quality: Optional watsonx.ai
-NEWS_LLM_MODEL=watsonx/ibm/granite-13b-chat-v2
-
-# Alternative: OpenAI or Anthropic
-NEWS_LLM_MODEL=openai/gpt-4o-mini
-NEWS_LLM_MODEL=anthropic/claude-3-5-sonnet-latest
-```
+- 🤖 **AI-Powered Content**: Daily videos generated using CrewAI and LLMs
+- 📺 **Minimalist UI**: Clean, professional Next.js frontend
+- ☁️ **Multi-Platform Upload**: YouTube (primary) + Cloudflare R2 (backup)
+- ⚡ **Automated Pipeline**: GitHub Actions runs daily video generation
+- 🔬 **Colab Support**: Generate videos manually via Google Colab
+- 🌐 **Vercel Ready**: One-click deployment to Vercel
+- 🆓 **Free Tier Available**: Use Ollama for zero-cost development
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Docker & Docker Compose
-- **That's it!** No API keys needed for local development
+### Option 1: Deploy to Vercel (Fastest)
 
-### 1. Clone & Setup
+1. Click the **Deploy** button above
+2. Configure environment variables
+3. Your channel is live! 🎉
 
-```bash
-git clone https://github.com/ruslanmv/tv.ruslanmv.com.git
-cd tv.ruslanmv.com
-cp .env.example .env
-```
-
-### 2. Start Everything
+### Option 2: Run Locally
 
 ```bash
-# Start all services (includes Ollama)
-docker-compose up -d
+# Clone repository
+git clone https://github.com/ruslanmv/tv.ruslanmv.git
+cd tv.ruslanmv
 
-# Setup Ollama models
-docker-compose --profile setup up ollama-setup
+# Install frontend dependencies
+cd frontend
+npm install
+npm run dev
 
-# Wait for Ollama to be ready
-curl http://localhost:11434/api/tags
+# Frontend runs at http://localhost:3000
 ```
 
-### 3. Generate Your First Episode
+### Option 3: Generate Videos with Colab
 
-```bash
-# Manual generation
-docker-compose run --rm content-generator python scripts/generate_script.py
-
-# View logs
-docker-compose logs -f content-generator
-```
-
-### 4. Access Your TV Channel
-- **Frontend**: http://localhost:3001
-- **API Docs**: http://localhost:8000/docs
-- **Ollama**: http://localhost:11434
+1. Open [`colab/generate_video.ipynb`](./colab/generate_video.ipynb) in Google Colab
+2. Add your API keys in Colab Secrets
+3. Run all cells
+4. Videos upload automatically to YouTube and R2
 
 ---
 
@@ -124,11 +89,24 @@ Get API key: https://cloud.ibm.com/
 
 ---
 
-## 🤖 GitHub Actions Workflow
+## 🤖 Automated Daily Pipeline
 
-### Automated Daily Episodes
+### How It Works
 
-The workflow runs **every day at 6 AM CET** and:
+```mermaid
+graph LR
+    A[GitHub Actions] --> B[Fetch AI News]
+    B --> C[Analyze Packages]
+    C --> D[Generate Script]
+    D --> E[Text-to-Speech]
+    E --> F[Create Video]
+    F --> G[Upload to YouTube]
+    F --> H[Backup to R2]
+    G --> I[Update Website]
+    H --> I
+```
+
+The workflow runs **every day at 04:00 UTC** (06:00 CET) and:
 
 1. ✅ **Setup** - Python, FFmpeg, Ollama
 2. 📰 **Fetch News** - Latest AI/tech news
@@ -136,64 +114,63 @@ The workflow runs **every day at 6 AM CET** and:
 4. ✍️ **Generate Script** - Using CrewAI + LLM
 5. 🎤 **Create Audio** - Text-to-speech
 6. 🎨 **Generate Video** - Visuals + subtitles
-7. 📤 **Upload YouTube** - Automatic publishing
+7. 📤 **Upload to All Platforms** - YouTube + R2
 8. 💾 **Update Database** - Episode metadata
-9. 🌐 **Deploy Website** - GitHub Pages
+9. 🌐 **Deploy Website** - Vercel
 
-### Setup GitHub Actions
+### Required Secrets (GitHub Actions)
 
-1. **Fork the repository**
+Add these in **Settings → Secrets → Actions**:
 
-2. **Add GitHub Secrets:**
-   ```
-   # Required for YouTube upload
-   YOUTUBE_CLIENT_ID
-   YOUTUBE_CLIENT_SECRET
-   YOUTUBE_REFRESH_TOKEN
-   YOUTUBE_API_KEY
-   
-   # Required for TTS
-   ELEVENLABS_API_KEY  # or OPENAI_API_KEY
-   
-   # Optional: Better quality
-   WATSONX_APIKEY
-   WATSONX_PROJECT_ID
-   WATSONX_URL
-   
-   # Optional: Database
-   DATABASE_URL
-   ```
+```
+# YouTube (required for upload)
+YOUTUBE_CLIENT_ID
+YOUTUBE_CLIENT_SECRET
+YOUTUBE_REFRESH_TOKEN
 
-3. **Enable GitHub Actions**
-   - Go to Actions tab
-   - Enable workflows
+# Cloudflare R2 (optional backup)
+R2_ACCOUNT_ID
+R2_ACCESS_KEY_ID
+R2_SECRET_ACCESS_KEY
+```
 
-4. **Manual Trigger** (optional)
-   - Actions → "📺 Daily AI News Video Generation"
-   - Click "Run workflow"
+### Optional Secrets
+
+```
+# Better TTS quality
+ELEVENLABS_API_KEY
+
+# Premium LLM (instead of free Ollama)
+WATSONX_APIKEY
+WATSONX_PROJECT_ID
+```
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete setup guide.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-tv.ruslanmv.com/
-├── .github/
-│   └── workflows/
-│       └── daily-video.yml          # GitHub Actions workflow
-├── scripts/
-│   ├── llm_client.py                # LLM abstraction (Ollama/watsonx)
-│   ├── generate_script.py           # CrewAI script generation
-│   ├── fetch_news.py                # News scraping
-│   ├── analyze_packages.py          # Package tracking
-│   ├── generate_audio.py            # TTS generation
-│   ├── generate_video.py            # Video assembly
-│   ├── upload_youtube.py            # YouTube uploader
-│   ├── setup-ollama.sh              # Ollama model setup
-│   └── requirements.txt             # Python dependencies
-├── docker-compose.yml               # Includes Ollama service
-├── .env.example                     # Environment template
-└── README.md                        # This file
+tv.ruslanmv/
+├── frontend/              # Next.js minimalist UI
+│   ├── src/
+│   │   ├── app/          # Next.js 14 app router
+│   │   └── components/   # React components (TVPlayer)
+│   └── package.json
+├── scripts/              # Video generation pipeline
+│   ├── fetch_news.py     # Fetch AI news
+│   ├── generate_script.py # CrewAI script generation
+│   ├── generate_video.py  # FFmpeg video assembly
+│   ├── upload_youtube.py  # YouTube uploader
+│   ├── upload_r2.py       # Cloudflare R2 uploader
+│   └── upload_all.py      # Multi-platform uploader
+├── colab/                # Google Colab notebooks
+│   └── generate_video.ipynb
+├── .github/workflows/    # CI/CD automation
+│   └── daily-video.yml   # Daily video generation
+├── vercel.json           # Vercel deployment config
+└── DEPLOYMENT.md         # Complete deployment guide
 ```
 
 ---
