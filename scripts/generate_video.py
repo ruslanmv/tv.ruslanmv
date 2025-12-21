@@ -1,148 +1,124 @@
 #!/usr/bin/env python3
 """
-Generate video from script and audio
-Uses FFmpeg for video assembly with visuals and subtitles
+Generate a simple "news studio" style video:
+- solid background
+- header text
+- burned-in subtitles (SRT)
+- audio narration
+
+Requires: ffmpeg + ffprobe installed in runner.
 """
+from __future__ import annotations
 import os
 import sys
 import json
-from pathlib import Path
-from datetime import datetime
 import subprocess
+from pathlib import Path
+from scripts._common import OUTPUT_DIR
+from dotenv import load_dotenv
 
-# Output directories
-OUTPUT_DIR = Path("output")
-ASSETS_DIR = Path("assets")
-OUTPUT_DIR.mkdir(exist_ok=True)
+def get_audio_duration(audio_file: Path) -> float:
+    cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(audio_file)]
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr)
+    data = json.loads(r.stdout)
+    return float(data["format"]["duration"])
 
+def srt_time(seconds: float) -> str:
+    h = int(seconds // 3600)
+    m = int((seconds % 3600) // 60)
+    s = int(seconds % 60)
+    ms = int((seconds - int(seconds)) * 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
-def create_subtitle_file(script_text: str, duration: float) -> str:
-    """Create SRT subtitle file from script"""
-    srt_file = OUTPUT_DIR / "episode_subtitles.srt"
-    
-    # Simple subtitle generation (split by sentences)
-    sentences = script_text.replace('\n\n', '. ').split('. ')
-    time_per_sentence = duration / len(sentences)
-    
-    with open(srt_file, 'w') as f:
-        for i, sentence in enumerate(sentences, 1):
-            start_time = i * time_per_sentence
-            end_time = (i + 1) * time_per_sentence
-            
-            # Format time as HH:MM:SS,mmm
-            start = format_srt_time(start_time)
-            end = format_srt_time(end_time)
-            
-            f.write(f"{i}\n")
-            f.write(f"{start} --> {end}\n")
-            f.write(f"{sentence.strip()}\n\n")
-    
-    return str(srt_file)
+def create_subtitles(script_text: str, duration: float, max_lines: int = 120) -> Path:
+    # naive sentence split that works reliably in CI
+    parts = [p.strip() for p in script_text.replace("\n", " ").split(".") if p.strip()]
+    if not parts:
+        parts = [script_text.strip()]
 
+    # limit to avoid giant SRT
+    parts = parts[:max_lines]
 
-def format_srt_time(seconds: float) -> str:
-    """Format seconds as SRT timestamp"""
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    secs = int(seconds % 60)
-    millis = int((seconds % 1) * 1000)
-    return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
+    per = max(1.0, duration / len(parts))
+    srt_path = OUTPUT_DIR / "episode_subtitles.srt"
 
+    with srt_path.open("w", encoding="utf-8") as f:
+        t = 0.0
+        for i, line in enumerate(parts, start=1):
+            start = t
+            end = min(duration, t + per)
+            f.write(f"{i}\n{srt_time(start)} --> {srt_time(end)}\n{line}\n\n")
+            t = end
 
-def generate_video():
-    """Generate video using FFmpeg"""
-    print("=" * 70)
-    print("🎬 Video Generation for TV.RUSLANMV.COM")
-    print("=" * 70)
-    
-    # Check inputs
-    audio_file = OUTPUT_DIR / "episode_audio.mp3"
-    if not audio_file.exists():
-        print(f"❌ Audio file not found: {audio_file}")
-        sys.exit(1)
-    
-    script_file = OUTPUT_DIR / "episode_script.txt"
-    with open(script_file, 'r') as f:
-        script_text = f.read()
-    
-    # Get audio duration
-    print("\n📊 Analyzing audio...")
-    result = subprocess.run(
-        ['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', str(audio_file)],
-        capture_output=True,
-        text=True
-    )
-    audio_info = json.loads(result.stdout)
-    duration = float(audio_info['format']['duration'])
-    print(f"   Duration: {duration:.1f} seconds ({duration/60:.1f} minutes)")
-    
-    # Create subtitles
-    print("\n📝 Generating subtitles...")
-    subtitle_file = create_subtitle_file(script_text, duration)
-    print(f"   ✅ Subtitles created: {subtitle_file}")
-    
-    # Video configuration
-    resolution = os.getenv("VIDEO_RESOLUTION", "1920x1080")
-    fps = int(os.getenv("VIDEO_FPS", "30"))
-    
-    # Output file
-    output_file = OUTPUT_DIR / "episode_video.mp4"
-    
-    # FFmpeg command for video generation
-    # Creates video with:
-    # - Solid color background
-    # - Audio track
-    # - Animated text/logo
-    # - Subtitles
-    
-    print(f"\n🎬 Generating video ({resolution} @ {fps}fps)...")
-    
-    ffmpeg_cmd = [
-        'ffmpeg',
-        '-y',  # Overwrite output
-        '-f', 'lavfi',
-        '-i', f'color=c=0x1a1a2e:s={resolution}:d={duration}:r={fps}',  # Background
-        '-i', str(audio_file),  # Audio
-        '-vf', f"drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='TV.RUSLANMV':fontcolor=white:fontsize=72:x=(w-text_w)/2:y=100,subtitles={subtitle_file}:force_style='FontSize=24,PrimaryColour=&HFFFFFF&'",  # Text overlay + subtitles
-        '-c:v', 'libx264',
-        '-preset', 'medium',
-        '-crf', '23',
-        '-c:a', 'aac',
-        '-b:a', '192k',
-        '-shortest',
-        str(output_file)
+    return srt_path
+
+def find_font() -> str:
+    # ubuntu runners
+    candidates = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
-    
-    try:
-        subprocess.run(ffmpeg_cmd, check=True)
-        print(f"\n✅ Video generated: {output_file}")
-        
-        # Get file size
-        size_mb = output_file.stat().st_size / (1024 * 1024)
-        print(f"   Size: {size_mb:.1f} MB")
-        
-        # Save metadata
-        metadata = {
-            "date": datetime.now().isoformat(),
-            "duration": duration,
-            "resolution": resolution,
-            "fps": fps,
-            "size_mb": size_mb,
-            "audio_file": str(audio_file),
-            "video_file": str(output_file)
-        }
-        
-        metadata_file = OUTPUT_DIR / "video_metadata.json"
-        with open(metadata_file, 'w') as f:
-            json.dump(metadata, f, indent=2)
-        
-        print("\n✅ SUCCESS: Video generation complete!")
-        return str(output_file)
-        
-    except subprocess.CalledProcessError as e:
-        print(f"\n❌ FFmpeg error: {e}")
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return "Arial"
+
+def main() -> None:
+    load_dotenv()
+
+    audio = OUTPUT_DIR / "episode_audio.mp3"
+    script = OUTPUT_DIR / "episode_script.txt"
+    if not audio.exists():
+        print("❌ Missing audio: output/episode_audio.mp3")
+        sys.exit(1)
+    if not script.exists():
+        print("❌ Missing script: output/episode_script.txt")
         sys.exit(1)
 
+    script_text = script.read_text(encoding="utf-8").strip()
+    duration = get_audio_duration(audio)
+
+    # Config
+    resolution = os.getenv("VIDEO_RESOLUTION", "1920x1080")
+    fps = os.getenv("VIDEO_FPS", "30")
+    brand = os.getenv("VIDEO_BRAND", "TV.RUSLANMV")
+    bg = os.getenv("VIDEO_BG", "0x0b1220")  # deep navy
+
+    subtitles = create_subtitles(script_text, duration)
+    font = find_font()
+
+    out = OUTPUT_DIR / "episode_video.mp4"
+
+    vf = (
+        f"drawtext=fontfile='{font}':"
+        f"text='{brand} - Daily AI News':"
+        f"fontcolor=white:fontsize=56:x=(w-text_w)/2:y=70,"
+        f"drawtext=fontfile='{font}':"
+        f"text='Generated Episode':"
+        f"fontcolor=white:fontsize=28:x=(w-text_w)/2:y=150,"
+        f"subtitles='{subtitles}':force_style='FontSize=28,PrimaryColour=&HFFFFFF&,Outline=1,Shadow=0,Alignment=2,MarginV=60'"
+    )
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "lavfi", "-i", f"color=c={bg}:s={resolution}:d={duration}:r={fps}",
+        "-i", str(audio),
+        "-vf", vf,
+        "-c:v", "libx264", "-preset", "veryfast", "-crf", "22",
+        "-c:a", "aac", "-b:a", "192k",
+        "-shortest",
+        str(out),
+    ]
+
+    print("🎬 Rendering video via FFmpeg...")
+    r = subprocess.run(cmd, text=True)
+    if r.returncode != 0:
+        print("❌ FFmpeg failed.")
+        sys.exit(r.returncode)
+
+    print(f"✅ Video generated -> {out}")
 
 if __name__ == "__main__":
-    generate_video()
+    main()

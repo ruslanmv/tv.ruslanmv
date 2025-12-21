@@ -24,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [episodeIndex, setEpisodeIndex] = useState<EpisodeIndex | null>(null);
+  const [showLatest, setShowLatest] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -88,26 +89,32 @@ export default function Home() {
       {/* Sticky top area (ticker + header). Keeps layout stable and fixes the "jump" on scroll. */}
       <div className="sticky top-0 z-50">
         {/* Utility Bar / Ticker */}
-        <div className="bg-text text-white text-sm border-b border-gray-800 overflow-hidden">
-          <div className="container mx-auto flex items-center px-4 py-2">
-            <span className="bg-accent px-3 py-0.5 text-[11px] font-bold uppercase mr-4 rounded-sm tracking-wide shrink-0 leading-none">
-              Latest
-            </span>
-            <div className="flex-1 overflow-hidden relative h-6">
-              <div className="absolute whitespace-nowrap animate-marquee flex items-center h-full will-change-transform">
-                <span className="mx-8">
-                  <strong>New Tutorial:</strong> Building Multi-Agent Systems with Universal A2A Agent
-                </span>
-                <span className="mx-8">
-                  <strong>Update:</strong> Watsonx.ai Agent to MCP Gateway released
-                </span>
-                <span className="mx-8">
-                  <strong>Conference:</strong> Live coverage of IBM TechXchange starting soon
-                </span>
+        {showLatest && (
+          <div className="bg-text text-white text-sm border-b border-gray-800 overflow-hidden">
+            <div className="container mx-auto flex items-center px-4 py-2">
+              <button
+                onClick={() => setShowLatest(false)}
+                className="bg-accent px-3 py-0.5 text-[11px] font-bold uppercase mr-4 rounded-sm tracking-wide shrink-0 leading-none hover:bg-accentHover transition-colors cursor-pointer"
+                title="Click to hide"
+              >
+                Latest
+              </button>
+              <div className="flex-1 overflow-hidden relative h-6">
+                <div className="absolute whitespace-nowrap animate-marquee flex items-center h-full will-change-transform">
+                  <span className="mx-8">
+                    <strong>New Tutorial:</strong> Building Multi-Agent Systems with Universal A2A Agent
+                  </span>
+                  <span className="mx-8">
+                    <strong>Update:</strong> Watsonx.ai Agent to MCP Gateway released
+                  </span>
+                  <span className="mx-8">
+                    <strong>Conference:</strong> Live coverage of IBM TechXchange starting soon
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Header */}
         <header className="bg-white border-b border-gray-200 shadow-soft">
@@ -130,16 +137,21 @@ export default function Home() {
               </a>
 
               <nav className="hidden lg:flex items-center space-x-8 text-sm font-semibold text-muted">
-                {["Home", "Live Stream", "Tutorials", "Talks", "About"].map((item, idx) => (
-                  <a
-                    key={item}
-                    href="#"
-                    className={`${idx === 1 ? "text-accent" : "hover:text-accent"} transition-colors`}
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    {item}
-                  </a>
-                ))}
+                <a href="/" className="hover:text-accent transition-colors">
+                  Home
+                </a>
+                <a href="#" className="text-accent transition-colors" onClick={(e) => e.preventDefault()}>
+                  Live Stream
+                </a>
+                <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+                  Tutorials
+                </a>
+                <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+                  Talks
+                </a>
+                <a href="https://ruslanmv.com/about" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
+                  About
+                </a>
               </nav>
 
               <div className="flex items-center space-x-4">
@@ -364,16 +376,16 @@ export default function Home() {
             </div>
 
             <div className="flex space-x-6">
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-gray-400 hover:text-accent transition-colors">
+              <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-accent transition-colors">
                 Twitter
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-gray-400 hover:text-black transition-colors">
+              <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black transition-colors">
                 GitHub
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-gray-400 hover:text-orange-500 transition-colors">
+              <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-orange-500 transition-colors">
                 RSS
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="text-gray-400 hover:text-blue-700 transition-colors">
+              <a href="https://linkedin.com/in/ruslanmv" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-700 transition-colors">
                 LinkedIn
               </a>
             </div>
