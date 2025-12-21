@@ -165,6 +165,7 @@ const TVPlayer: React.FC<TVPlayerProps> = ({ episode, autoPlay = true }) => {
       <footer className="border-t border-gray-800 mt-16">
         <div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
           <p>AI-Powered Entertainment Channel</p>
+          <p className="mt-2 text-xs text-gray-600">Powered by Vercel</p>
         </div>
       </footer>
     </div>
