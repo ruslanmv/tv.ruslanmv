@@ -30,4 +30,5 @@ body {
 body {
   background: #ffffff;
   color: #252a34;
+  overflow-x: hidden; /* Prevent horizontal scroll from marquee */
 }

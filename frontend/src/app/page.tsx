@@ -10,13 +10,7 @@ import {
   FaCheckCircle,
   FaClock,
   FaCommentAlt,
-  FaArrowRight,
-  FaRobot,
-  FaCloudUploadAlt,
-  FaBolt,
-  FaChartLine,
-  FaVideo,
-  FaMicrophone
+  FaArrowRight
 } from "react-icons/fa";
 
 function formatDate(dateStr: string) {
@@ -60,77 +54,104 @@ export default function Home() {
     episode?.description ??
     "Join us for a deep dive into Retrieval-Augmented Generation. Learn secure, scalable AI agent patterns, vector search, prompt engineering, and deployment strategies.";
 
+  // Recent items are derived from the episode index (fallback to empty list)
+  const recentEpisodes = useMemo(() => {
+    const list = episodeIndex?.episodes ?? [];
+    // Prefer newest first when possible
+    return list
+      .slice()
+      .sort((a, b) => {
+        const da = Date.parse(a.published_at || a.created_at || a.date || "") || 0;
+        const db = Date.parse(b.published_at || b.created_at || b.date || "") || 0;
+        return db - da;
+      })
+      // Hide the current hero episode if it has the same YouTube id or same date
+      .filter((ep) => {
+        if (!episode) return true;
+        if (episode.youtube_id && ep.youtube_id) return ep.youtube_id !== episode.youtube_id;
+        if (episode.date && ep.date) return ep.date !== episode.date;
+        return true;
+      })
+      .slice(0, 9);
+  }, [episodeIndex, episode]);
+
   return (
     <>
-      {/* Utility Bar / Ticker */}
-      <div className="bg-text text-white text-sm py-2 overflow-hidden border-b border-gray-800">
-        <div className="container mx-auto flex items-center px-4">
-          <span className="bg-accent px-3 py-0.5 text-xs font-bold uppercase mr-4 rounded-sm tracking-wide shrink-0">
-            Latest
-          </span>
-          <div className="flex-1 overflow-hidden relative h-5">
-            <div className="absolute whitespace-nowrap animate-marquee flex items-center h-full">
-              <span className="mx-8">
-                <strong>New Tutorial:</strong> Building Multi-Agent Systems with Universal A2A Agent
-              </span>
-              <span className="mx-8">
-                <strong>Update:</strong> Watsonx.ai Agent to MCP Gateway released
-              </span>
-              <span className="mx-8">
-                <strong>Conference:</strong> Live coverage of IBM TechXchange starting soon
-              </span>
+      {/* Sticky top area (ticker + header). Keeps layout stable and fixes the "jump" on scroll. */}
+      <div className="sticky top-0 z-50">
+        {/* Utility Bar / Ticker */}
+        <div className="bg-text text-white text-sm border-b border-gray-800 overflow-hidden">
+          <div className="container mx-auto flex items-center px-4 py-2">
+            <span className="bg-accent px-3 py-0.5 text-[11px] font-bold uppercase mr-4 rounded-sm tracking-wide shrink-0 leading-none">
+              Latest
+            </span>
+            <div className="flex-1 overflow-hidden relative h-6">
+              <div className="absolute whitespace-nowrap animate-marquee flex items-center h-full will-change-transform">
+                <span className="mx-8">
+                  <strong>New Tutorial:</strong> Building Multi-Agent Systems with Universal A2A Agent
+                </span>
+                <span className="mx-8">
+                  <strong>Update:</strong> Watsonx.ai Agent to MCP Gateway released
+                </span>
+                <span className="mx-8">
+                  <strong>Conference:</strong> Live coverage of IBM TechXchange starting soon
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-soft">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <a href="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden shadow-sm border border-gray-100">
-                <img
-                  src="https://ui-avatars.com/api/?name=RM&background=268bd2&color=fff&font-size=0.5"
-                  alt="RuslanMV"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="leading-tight">
-                <h1 className="text-xl font-bold tracking-tight group-hover:text-accent transition-colors">
-                  TV.RuslanMV
-                </h1>
-                <p className="text-xs text-muted">Artificial Intelligence &amp; Cloud Broadcasting</p>
-              </div>
-            </a>
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 shadow-soft">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <a href="/" className="flex items-center space-x-3 group">
+                <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden shadow-sm border border-gray-100">
+                  <img
+                    src="https://ui-avatars.com/api/?name=RM&background=268bd2&color=fff&font-size=0.5"
+                    alt="RuslanMV"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="leading-tight">
+                  <h1 className="text-xl font-bold tracking-tight group-hover:text-accent transition-colors">
+                    TV.RuslanMV
+                  </h1>
+                  <p className="text-xs text-muted">Artificial Intelligence &amp; Cloud Broadcasting</p>
+                </div>
+              </a>
 
-            <nav className="hidden lg:flex items-center space-x-8 text-sm font-semibold text-muted">
-              {["Home", "Live Stream", "Tutorials", "Talks", "About"].map((item, idx) => (
-                <a
-                  key={item}
-                  href="#"
-                  className={`${idx === 1 ? "text-accent" : "hover:text-accent"} transition-colors`}
-                  onClick={(e) => e.preventDefault()}
+              <nav className="hidden lg:flex items-center space-x-8 text-sm font-semibold text-muted">
+                {["Home", "Live Stream", "Tutorials", "Talks", "About"].map((item, idx) => (
+                  <a
+                    key={item}
+                    href="#"
+                    className={`${idx === 1 ? "text-accent" : "hover:text-accent"} transition-colors`}
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    {item}
+                  </a>
+                ))}
+              </nav>
+
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => window.scrollTo({ top: 200, behavior: "smooth" })}
+                  className="bg-accent hover:bg-accentHover text-white px-5 py-2 rounded text-sm font-medium transition-colors shadow-sm flex items-center"
                 >
-                  {item}
-                </a>
-              ))}
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => window.scrollTo({ top: 200, behavior: "smooth" })}
-                className="bg-accent hover:bg-accentHover text-white px-5 py-2 rounded text-sm font-medium transition-colors shadow-sm flex items-center"
-              >
-                Watch Live
-              </button>
-              <button className="lg:hidden text-text p-2 hover:bg-lightGray rounded transition-colors" aria-label="Open menu">
-                <FaBars className="text-xl" />
-              </button>
+                  Watch Live
+                </button>
+                <button
+                  className="lg:hidden text-text p-2 hover:bg-lightGray rounded transition-colors"
+                  aria-label="Open menu"
+                >
+                  <FaBars className="text-xl" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       <main className="flex-grow">
         {/* Hero / Player */}
@@ -250,7 +271,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Recent Broadcasts */}
+        {/* Recent Broadcasts (real data from episode index) */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
@@ -265,289 +286,40 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  tag: "AI Agents",
-                  date: "Oct 01",
-                  title: "Multi-Agent Systems with Universal A2A",
-                  desc: "A comprehensive guide to building autonomous agent systems using the latest orchestration tools and frameworks.",
-                  img: "https://picsum.photos/400/250?random=1",
-                  duration: "13:20"
-                },
-                {
-                  tag: "Cloud",
-                  date: "Jul 07",
-                  title: "Watsonx Orchestrate: Zero to Hero",
-                  desc: "Learn how to orchestrate complex cloud workflows using IBM's latest AI tooling and serverless functions.",
-                  img: "https://picsum.photos/400/250?random=2",
-                  duration: "26:05"
-                },
-                {
-                  tag: "Development",
-                  date: "Apr 20",
-                  title: "Full-Stack AI App with MCP Gateway",
-                  desc: "Building a full-featured Retrieval-Augmented Generation (RAG) server using ChromaDB and MCP protocol.",
-                  img: "https://picsum.photos/400/250?random=3",
-                  duration: "34:10"
-                }
-              ].map((card) => (
+              {recentEpisodes.map((ep) => (
                 <article
-                  key={card.title}
+                  key={ep.date || ep.id || ep.youtube_id || ep.title}
                   className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
                 >
-                  <div className="aspect-video bg-gray-100 relative group cursor-pointer">
-                    <img src={card.img} alt={card.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
-                        <span className="text-accent ml-1">▶</span>
+                  <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 relative group cursor-pointer">
+                    {(ep.youtube_url || ep.video_url) && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
+                          <span className="text-accent ml-1">▶</span>
+                        </div>
                       </div>
-                    </div>
-                    <span className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-1.5 py-0.5 rounded font-mono">
-                      {card.duration}
+                    )}
+                    <span className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                      {ep.date || formatDate(ep.published_at || ep.created_at || "")}
                     </span>
                   </div>
 
                   <div className="p-5">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-accent uppercase tracking-wide">{card.tag}</span>
+                      <span className="text-xs font-bold text-accent uppercase tracking-wide">Episode</span>
                       <span className="text-xs text-gray-500">
-                        <FaCalendarAlt className="inline mr-1" /> {card.date}
+                        <FaCalendarAlt className="inline mr-1" /> {ep.date || formatDate(ep.published_at || ep.created_at || "")}
                       </span>
                     </div>
 
                     <h4 className="font-bold text-lg mb-2 leading-tight text-text hover:text-accent transition-colors cursor-pointer">
-                      {card.title}
+                      {ep.title}
                     </h4>
 
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{card.desc}</p>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{ep.description}</p>
                   </div>
                 </article>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Previous Episodes (from R2) */}
-        {episodeIndex && episodeIndex.episodes && episodeIndex.episodes.length > 0 && (
-          <section className="py-16 bg-white">
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
-                <div>
-                  <h3 className="text-2xl font-bold text-text">All Episodes</h3>
-                  <p className="text-sm text-muted mt-1">
-                    {episodeIndex.episodes.length} episode{episodeIndex.episodes.length !== 1 ? 's' : ''} available
-                  </p>
-                </div>
-                <div className="text-xs text-muted">
-                  Updated: {formatDate(episodeIndex.updated_at)}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {episodeIndex.episodes.slice(0, 9).map((ep) => (
-                  <article
-                    key={ep.date || ep.id}
-                    className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-                  >
-                    <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 relative group cursor-pointer">
-                      {(ep.youtube_url || ep.video_url) && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
-                            <span className="text-accent text-xl ml-1">▶</span>
-                          </div>
-                        </div>
-                      )}
-                      <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                        {ep.date || formatDate(ep.published_at || ep.created_at || '')}
-                      </div>
-                      {ep.source && (
-                        <div className="absolute top-2 left-2 bg-accent/90 text-white text-xs px-2 py-1 rounded font-bold">
-                          AI-GENERATED
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-5">
-                      <h4 className="font-bold text-lg mb-2 leading-tight text-text hover:text-accent transition-colors cursor-pointer line-clamp-2">
-                        {ep.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{ep.description}</p>
-
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted flex items-center gap-1">
-                          <FaCalendarAlt className="inline" /> {ep.date || 'N/A'}
-                        </span>
-                        {ep.duration_seconds && (
-                          <span className="text-muted">
-                            {Math.floor(ep.duration_seconds / 60)}:{(ep.duration_seconds % 60).toString().padStart(2, '0')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-
-              {episodeIndex.episodes.length > 9 && (
-                <div className="text-center mt-8">
-                  <button className="px-6 py-3 bg-accent hover:bg-accentHover text-white rounded-lg font-medium transition-colors shadow-sm">
-                    Load More Episodes
-                  </button>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* AI-Powered Features */}
-        <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-50 border-y border-gray-200">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full text-sm font-bold mb-4">
-                <FaRobot className="animate-pulse" /> AI-POWERED PLATFORM
-              </div>
-              <h3 className="text-3xl font-bold text-text mb-4">Automated Content Generation</h3>
-              <p className="text-gray-600 max-w-3xl mx-auto text-lg">
-                Our channel leverages cutting-edge AI technology to generate, produce, and broadcast daily technical content automatically.
-                Built with CrewAI, deployed on Vercel, and powered by enterprise LLMs.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {/* Feature 1: AI Content */}
-              <div className="bg-white rounded-xl p-6 shadow-card hover:shadow-lg transition-all duration-300 border border-gray-100">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mb-4 shadow-md">
-                  <FaRobot className="text-white text-xl" />
-                </div>
-                <h4 className="font-bold text-lg mb-2 text-text">AI-Generated Scripts</h4>
-                <p className="text-gray-600 text-sm mb-3">
-                  CrewAI agents research trending topics, analyze tech news, and generate engaging video scripts automatically using LLMs.
-                </p>
-                <div className="flex items-center text-xs text-accent font-semibold">
-                  <FaChartLine className="mr-1" /> 350+ Videos Generated
-                </div>
-              </div>
-
-              {/* Feature 2: Automated Pipeline */}
-              <div className="bg-white rounded-xl p-6 shadow-card hover:shadow-lg transition-all duration-300 border border-gray-100">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg flex items-center justify-center mb-4 shadow-md">
-                  <FaBolt className="text-white text-xl" />
-                </div>
-                <h4 className="font-bold text-lg mb-2 text-text">Automated Pipeline</h4>
-                <p className="text-gray-600 text-sm mb-3">
-                  GitHub Actions runs daily at 06:00 CET. From news fetching to YouTube upload - fully automated end-to-end.
-                </p>
-                <div className="flex items-center text-xs text-green-600 font-semibold">
-                  <FaBolt className="mr-1" /> Runs Daily
-                </div>
-              </div>
-
-              {/* Feature 3: Text-to-Speech */}
-              <div className="bg-white rounded-xl p-6 shadow-card hover:shadow-lg transition-all duration-300 border border-gray-100">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-4 shadow-md">
-                  <FaMicrophone className="text-white text-xl" />
-                </div>
-                <h4 className="font-bold text-lg mb-2 text-text">AI Voice Synthesis</h4>
-                <p className="text-gray-600 text-sm mb-3">
-                  Professional text-to-speech using ElevenLabs or OpenAI for natural, engaging narration in multiple languages.
-                </p>
-                <div className="flex items-center text-xs text-purple-600 font-semibold">
-                  <FaMicrophone className="mr-1" /> Professional Quality
-                </div>
-              </div>
-
-              {/* Feature 4: Video Assembly */}
-              <div className="bg-white rounded-xl p-6 shadow-card hover:shadow-lg transition-all duration-300 border border-gray-100">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center mb-4 shadow-md">
-                  <FaVideo className="text-white text-xl" />
-                </div>
-                <h4 className="font-bold text-lg mb-2 text-text">FFmpeg Rendering</h4>
-                <p className="text-gray-600 text-sm mb-3">
-                  Automated video assembly with dynamic graphics, animations, and professional transitions using FFmpeg.
-                </p>
-                <div className="flex items-center text-xs text-orange-600 font-semibold">
-                  <FaVideo className="mr-1" /> HD Quality
-                </div>
-              </div>
-
-              {/* Feature 5: Multi-Platform */}
-              <div className="bg-white rounded-xl p-6 shadow-card hover:shadow-lg transition-all duration-300 border border-gray-100">
-                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center mb-4 shadow-md">
-                  <FaCloudUploadAlt className="text-white text-xl" />
-                </div>
-                <h4 className="font-bold text-lg mb-2 text-text">Multi-Platform Upload</h4>
-                <p className="text-gray-600 text-sm mb-3">
-                  Automatic upload to YouTube (primary) and Cloudflare R2 (backup) with metadata, thumbnails, and descriptions.
-                </p>
-                <div className="flex items-center text-xs text-red-600 font-semibold">
-                  <FaCloudUploadAlt className="mr-1" /> Redundant Storage
-                </div>
-              </div>
-
-              {/* Feature 6: Free Tier */}
-              <div className="bg-white rounded-xl p-6 shadow-card hover:shadow-lg transition-all duration-300 border border-gray-100">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-lg flex items-center justify-center mb-4 shadow-md">
-                  <FaCheckCircle className="text-white text-xl" />
-                </div>
-                <h4 className="font-bold text-lg mb-2 text-text">Free Development</h4>
-                <p className="text-gray-600 text-sm mb-3">
-                  Use Ollama (Gemma 2B, Llama 3.1) for zero-cost local development. Upgrade to watsonx.ai or OpenAI for production.
-                </p>
-                <div className="flex items-center text-xs text-indigo-600 font-semibold">
-                  <FaCheckCircle className="mr-1" /> Open Source
-                </div>
-              </div>
-            </div>
-
-            {/* AI Pipeline Visualization */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
-              <h4 className="font-bold text-xl mb-6 text-center text-text">Automated Daily Workflow</h4>
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                {[
-                  { icon: FaChartLine, label: "Fetch News", desc: "AI/Tech news" },
-                  { icon: FaRobot, label: "Generate Script", desc: "CrewAI agents" },
-                  { icon: FaMicrophone, label: "Synthesize Audio", desc: "TTS engine" },
-                  { icon: FaVideo, label: "Render Video", desc: "FFmpeg" },
-                  { icon: FaCloudUploadAlt, label: "Upload", desc: "YouTube + R2" }
-                ].map((step, idx) => (
-                  <div key={step.label} className="flex items-center">
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-accent to-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 shadow-md">
-                        <step.icon className="text-white text-2xl" />
-                      </div>
-                      <p className="font-bold text-sm text-text">{step.label}</p>
-                      <p className="text-xs text-muted">{step.desc}</p>
-                    </div>
-                    {idx < 4 && (
-                      <div className="hidden md:block mx-4">
-                        <FaArrowRight className="text-gray-300 text-2xl" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600 mb-2">Powered by GitHub Actions • Runs at 06:00 CET Daily</p>
-                <div className="inline-flex items-center gap-2 text-xs text-muted">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span>Next episode generation in 4h 23m</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Tech Stack */}
-            <div className="mt-8 text-center">
-              <p className="text-sm font-semibold text-muted mb-4">BUILT WITH</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {['Next.js', 'CrewAI', 'Ollama', 'watsonx.ai', 'FFmpeg', 'GitHub Actions', 'Vercel', 'YouTube API', 'Cloudflare R2'].map((tech) => (
-                  <span
-                    key={tech}
-                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-medium hover:border-accent hover:text-accent transition-colors cursor-default shadow-sm"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         </section>

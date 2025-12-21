@@ -39,7 +39,7 @@ export default function TVPlayer({
         <div className="text-center text-white/80 px-6">
           <p className="font-semibold">No episode available</p>
           <p className="text-sm text-white/60 mt-2">
-            New episodes are generated daily at 06:00 CET
+            New episodes will appear here when they are published.
           </p>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function TVPlayer({
           <button
             type="button"
             onClick={() => setPlaying(true)}
-            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]"
+            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] z-10"
             aria-label="Play stream"
           >
             <span className="w-20 h-20 bg-accent rounded-full flex items-center justify-center shadow-lg border border-white/20 hover:scale-110 transition-transform">
