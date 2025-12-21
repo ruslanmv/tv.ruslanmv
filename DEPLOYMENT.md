@@ -1,24 +1,58 @@
 # Vercel Deployment Guide
 
-## 🚀 Quick Fix for 404 Error
+## 🚀 Quick Fix for FastAPI Detection / 500 Error
 
-The 404 error occurs because Vercel doesn't know your Next.js app is in the `frontend/` subdirectory.
+**Problem:** Vercel is detecting this as a FastAPI/Python project and trying to deploy the backend, which causes errors.
 
-### **Solution: Configure Root Directory in Vercel Dashboard**
+**Root Cause:** Even with `.vercelignore`, Vercel can detect Python projects from `pyproject.toml` in the repo root.
+
+**Solution:** Configure Vercel to ONLY deploy the Next.js frontend.
+
+### **CRITICAL: Configure Root Directory in Vercel Dashboard**
+
+⚠️ **This MUST be done manually in Vercel Dashboard** - cannot be set in code
 
 1. Go to your Vercel project: https://vercel.com/dashboard
 2. Select your project (`tv.ruslanmv`)
 3. Go to **Settings** → **General**
 4. Under **Build & Development Settings**:
    - **Framework Preset**: `Next.js`
-   - **Root Directory**: `frontend` ← **CRITICAL**
-   - **Build Command**: `npm run build` (default is fine)
-   - **Output Directory**: `.next` (default is fine)
-   - **Install Command**: `npm install` (default is fine)
+   - **Root Directory**: `frontend` ← **⚠️ CRITICAL - MUST BE SET TO `frontend`**
+   - **Build Command**: Leave as default or set to `npm run build`
+   - **Output Directory**: Leave as default or set to `.next`
+   - **Install Command**: Leave as default or set to `npm install`
 
 5. Click **Save**
 6. Go to **Deployments** tab
-7. Click **Redeploy** on the latest deployment
+7. Click **⋯** menu on the latest deployment
+8. Click **Redeploy**
+
+**Why this works:** Setting Root Directory to `frontend` prevents Vercel from scanning the repo root (where `pyproject.toml` triggers Python/FastAPI detection). Vercel will only see and build the Next.js app.
+
+---
+
+## 🔧 What the Code Changes Do
+
+The repository includes configuration files to help prevent FastAPI detection:
+
+### `.vercelignore`
+```
+backend/                    # Excludes FastAPI backend
+*.py                        # Excludes all Python files
+pyproject.toml             # Excludes Python project config
+requirements*.txt          # Excludes Python dependencies
+```
+
+### `vercel.json`
+```json
+{
+  "framework": "nextjs",           # Explicitly declares Next.js
+  "outputDirectory": "frontend/.next",
+  "buildCommand": "cd frontend && npm install && npm run build"
+}
+```
+
+**Important:** These files help but are NOT sufficient alone. You MUST also set **Root Directory = `frontend`** in the Vercel Dashboard.
 
 ---
 

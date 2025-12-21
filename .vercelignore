@@ -1,21 +1,19 @@
 # --- Ignore heavy / non-Vercel parts ---
-# backend/ - REMOVED: Vercel needs access to backend for FastAPI
+backend/
 scripts/
 database/
 mcp-server/
 .docker/
 
-# IMPORTANT: Allow FastAPI entrypoint and backend
-!api/
-!backend/
-!requirements.txt
-
-# Ignore Python project config (use requirements.txt instead)
+# IMPORTANT: Prevent Vercel from detecting this as a Python/FastAPI project
+# The FastAPI backend is deployed separately (Docker/other platform)
+# Vercel should ONLY deploy the Next.js frontend
 pyproject.toml
 poetry.lock
+requirements*.txt
 
-# Still ignore some Python build artifacts at root
-# *.py - REMOVED: Vercel needs api/index.py
+# Ignore all Python files - Vercel is frontend-only
+*.py
 *.pyc
 __pycache__/
 .pytest_cache/
