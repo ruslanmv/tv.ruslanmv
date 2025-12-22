@@ -10,7 +10,8 @@ import {
   FaCheckCircle,
   FaClock,
   FaCommentAlt,
-  FaArrowRight
+  FaArrowRight,
+  FaLock
 } from "react-icons/fa";
 
 function formatDate(dateStr: string) {
@@ -86,88 +87,79 @@ export default function Home() {
 
   return (
     <>
-      {/* Sticky top area (ticker + header). Keeps layout stable and fixes the "jump" on scroll. */}
+      {/* Sticky top area (notification + header). Clean, professional design without scrolling distractions. */}
       <div className="sticky top-0 z-50">
-        {/* Utility Bar / Ticker */}
+        {/* Clean Top Notification (Replaces Scrolling Ticker) */}
         {showLatest && (
-          <div className="bg-text text-white text-sm border-b border-gray-800 overflow-hidden">
-            <div className="container mx-auto flex items-center px-4 py-2">
-              <button
-                onClick={() => setShowLatest(false)}
-                className="bg-accent px-3 py-0.5 text-[11px] font-bold uppercase mr-4 rounded-sm tracking-wide shrink-0 leading-none hover:bg-accentHover transition-colors cursor-pointer"
-                title="Click to hide"
-              >
-                Latest
-              </button>
-              <div className="flex-1 overflow-hidden relative h-6">
-                <div className="absolute whitespace-nowrap animate-marquee flex items-center h-full will-change-transform">
-                  <span className="mx-8">
-                    <strong>New Tutorial:</strong> Building Multi-Agent Systems with Universal A2A Agent
-                  </span>
-                  <span className="mx-8">
-                    <strong>Update:</strong> Watsonx.ai Agent to MCP Gateway released
-                  </span>
-                  <span className="mx-8">
-                    <strong>Conference:</strong> Live coverage of IBM TechXchange starting soon
-                  </span>
-                </div>
+          <div className="bg-text text-white text-xs py-2 border-b border-gray-800">
+            <div className="container mx-auto px-4 flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setShowLatest(false)}
+                  className="bg-accent px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider hover:bg-accentHover transition-colors cursor-pointer"
+                  title="Click to hide"
+                >
+                  New
+                </button>
+                <span className="font-medium text-gray-300">Tutorial: Building Multi-Agent Systems with Universal A2A Agent</span>
+              </div>
+              <div className="hidden md:flex items-center space-x-4 text-gray-400">
+                <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Documentation</a>
+                <a href="https://github.com/ruslanmv" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub Repo</a>
+                <a href="https://ruslanmv.com/about" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Support</a>
               </div>
             </div>
           </div>
         )}
 
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 shadow-soft">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <a href="/" className="flex items-center space-x-3 group">
-                <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden shadow-sm border border-gray-100">
-                  <img
-                    src="https://ui-avatars.com/api/?name=RM&background=268bd2&color=fff&font-size=0.5"
-                    alt="RuslanMV"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="leading-tight">
-                  <h1 className="text-xl font-bold tracking-tight group-hover:text-accent transition-colors">
-                    TV.RuslanMV
-                  </h1>
-                  <p className="text-xs text-muted">Artificial Intelligence &amp; Cloud Broadcasting</p>
-                </div>
-              </a>
-
-              <nav className="hidden lg:flex items-center space-x-8 text-sm font-semibold text-muted">
-                <a href="/" className="hover:text-accent transition-colors">
-                  Home
-                </a>
-                <a href="#" className="text-accent transition-colors" onClick={(e) => e.preventDefault()}>
-                  Live Stream
-                </a>
-                <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
-                  Tutorials
-                </a>
-                <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
-                  Talks
-                </a>
-                <a href="https://ruslanmv.com/about" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">
-                  About
-                </a>
-              </nav>
-
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => window.scrollTo({ top: 200, behavior: "smooth" })}
-                  className="bg-accent hover:bg-accentHover text-white px-5 py-2 rounded text-sm font-medium transition-colors shadow-sm flex items-center"
-                >
-                  Watch Live
-                </button>
-                <button
-                  className="lg:hidden text-text p-2 hover:bg-lightGray rounded transition-colors"
-                  aria-label="Open menu"
-                >
-                  <FaBars className="text-xl" />
-                </button>
+        {/* Minimalist Header */}
+        <header className="bg-white border-b border-border sticky top-0 z-50">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            {/* Brand */}
+            <a href="/" className="flex items-center space-x-3 group">
+              <div className="w-8 h-8 bg-gray-100 rounded-md overflow-hidden border border-gray-200">
+                <img
+                  src="https://ui-avatars.com/api/?name=RM&background=268bd2&color=fff&font-size=0.5"
+                  alt="RuslanMV"
+                  className="w-full h-full object-cover"
+                />
               </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-lg leading-none group-hover:text-accent transition-colors">TV.RuslanMV</span>
+                <span className="text-[10px] font-medium text-muted uppercase tracking-wide mt-0.5">Technical Broadcasting</span>
+              </div>
+            </a>
+
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-muted">
+              <a href="/" className="text-text hover:text-accent transition-colors">Live</a>
+              <a href="/archive" className="hover:text-accent transition-colors">Archive</a>
+              <a href="/series" className="hover:text-accent transition-colors">Series</a>
+              <a href="https://ruslanmv.com/" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">About</a>
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center space-x-3">
+              <div className="hidden sm:flex relative">
+                <input
+                  type="text"
+                  placeholder="Search topics..."
+                  className="bg-lightGray text-sm border-none rounded-full px-4 py-1.5 w-48 focus:ring-1 focus:ring-accent text-text placeholder-muted"
+                />
+                <i className="absolute right-3 top-2 text-muted text-xs">🔍</i>
+              </div>
+              <a
+                href="/admin"
+                className="hidden md:flex items-center bg-accent hover:bg-accentHover text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+              >
+                Admin
+              </a>
+              <button
+                className="md:hidden p-2 text-text"
+                aria-label="Open menu"
+              >
+                <FaBars />
+              </button>
             </div>
           </div>
         </header>
@@ -175,170 +167,129 @@ export default function Home() {
 
       <main className="flex-grow">
         {/* Hero / Player */}
-        <section className="bg-lightGray py-10 border-b border-gray-200">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
+        <section className="bg-lightGray border-b border-border">
+          <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-8 xl:col-span-9">
                 <TVPlayer episode={episode} onSectionChange={setCurrentSection} />
 
-                <div className="mt-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-                  <h2 className="text-2xl md:text-3xl font-bold text-text mb-2">{heroTitle}</h2>
+                {/* Video Info */}
+                <div className="mt-6">
+                  <h1 className="text-2xl font-bold text-text mb-2">{heroTitle}</h1>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted">
+                    <div className="flex items-center">
+                      <img
+                        src="https://ui-avatars.com/api/?name=RM&background=268bd2&color=fff&font-size=0.5"
+                        className="w-6 h-6 rounded-full mr-2"
+                        alt="Host"
+                      />
+                      <span className="font-medium text-text">Ruslan Magana V.</span>
+                    </div>
+                    <span className="text-gray-300">|</span>
+                    <span className="bg-blue-50 text-accent px-2 py-0.5 rounded text-xs font-medium">Machine Learning</span>
+                    <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-medium">Python</span>
+                  </div>
+                  <p className="mt-4 text-muted text-sm leading-relaxed max-w-4xl">
+                    {heroDescription}
+                  </p>
+                </div>
+              </div>
 
-                  <div className="flex flex-wrap items-center text-sm text-muted gap-4 mb-4">
-                    <span className="flex items-center gap-2">
-                      <FaClock /> Started 15 mins ago
-                    </span>
-                    <span className="flex items-center gap-2 text-accent">
-                      <FaCheckCircle /> Verified Broadcast
-                    </span>
-                    <span className="px-2 py-0.5 bg-blue-50 text-accent rounded-full text-xs font-bold uppercase tracking-wide border border-blue-100">
-                      Machine Learning
-                    </span>
+              {/* Sidebar: Live Chat / Up Next */}
+              <div className="lg:col-span-4 xl:col-span-3 flex flex-col h-full lg:h-auto">
+                <div className="bg-white rounded-xl border border-border shadow-sm flex flex-col h-[500px] lg:h-full overflow-hidden">
+                  {/* Tabs */}
+                  <div className="flex border-b border-border bg-gray-50">
+                    <button className="flex-1 py-3 text-xs font-bold uppercase tracking-wide text-accent border-b-2 border-accent bg-white">
+                      Live Chat
+                    </button>
+                    <button className="flex-1 py-3 text-xs font-bold uppercase tracking-wide text-muted hover:text-text hover:bg-white transition-colors">
+                      Schedule
+                    </button>
+                  </div>
 
-                    {episode?.published_at && (
-                      <span className="flex items-center gap-2">
-                        <FaCalendarAlt /> {formatDate(episode.published_at)}
+                  {/* Chat Area */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-white">
+                    <div className="flex items-start space-x-2 text-sm group">
+                      <span className="font-bold text-xs text-purple-600 min-w-[60px]">dev_sarah</span>
+                      <span className="text-gray-600 text-xs">Which vector DB are we using today? Chroma?</span>
+                    </div>
+                    <div className="flex items-start space-x-2 text-sm group">
+                      <span className="font-bold text-xs text-green-600 min-w-[60px]">mike_ai</span>
+                      <span className="text-gray-600 text-xs">Is the repo link pinned?</span>
+                    </div>
+                    <div className="flex items-start space-x-2 text-sm group">
+                      <span className="font-bold text-xs text-accent min-w-[60px]">@ruslanmv</span>
+                      <span className="text-gray-800 text-xs bg-blue-50 px-2 py-1 rounded inline-block">
+                        Yes! Check the description for the GitHub link. We are using ChromaDB.
                       </span>
-                    )}
-
-                    {currentSection?.title && <span className="text-accent">• {currentSection.title}</span>}
-                  </div>
-
-                  <hr className="border-gray-100 my-4" />
-
-                  <p className="text-gray-600 leading-relaxed max-w-4xl">{heroDescription}</p>
-                </div>
-              </div>
-
-              {/* Sidebar */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg border border-gray-200 p-0 shadow-card h-full flex flex-col">
-                  <div className="p-4 border-b border-gray-100 bg-gray-50 rounded-t-lg flex justify-between items-center">
-                    <h3 className="font-bold text-lg text-text">Schedule</h3>
-                    <span className="text-xs font-semibold text-muted uppercase">Today</span>
-                  </div>
-
-                  <div className="divide-y divide-gray-100 overflow-y-auto flex-1 max-h-[400px] lg:max-h-none">
-                    <div className="flex items-start space-x-3 p-4 bg-blue-50/50 border-l-4 border-accent">
-                      <div className="text-accent font-bold text-sm min-w-[50px]">NOW</div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-text">RAG Applications with watsonx.ai</h4>
-                        <p className="text-xs text-muted mt-1">Ruslan Magana V.</p>
-                      </div>
-                      <div className="ml-auto text-accent animate-pulse">●</div>
                     </div>
-
-                    {[
-                      { time: "14:00", title: "Universal A2A Agent Tutorial", sub: "Zero-to-Hero Guide" },
-                      { time: "15:30", title: "Cloud Architecture Patterns", sub: "Architecture Review" },
-                      { time: "17:00", title: "Q&A Session", sub: "Live Coding & Debugging" }
-                    ].map((item) => (
-                      <div
-                        key={item.time}
-                        className="flex items-start space-x-3 p-4 hover:bg-gray-50 transition-colors cursor-pointer group"
-                      >
-                        <div className="text-muted font-medium text-sm min-w-[50px] group-hover:text-text">
-                          {item.time}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-sm text-text group-hover:text-accent transition-colors">
-                            {item.title}
-                          </h4>
-                          <p className="text-xs text-muted mt-1">{item.sub}</p>
-                        </div>
-                      </div>
-                    ))}
+                    <div className="flex items-start space-x-2 text-sm group">
+                      <span className="font-bold text-xs text-orange-600 min-w-[60px]">cloud_arch</span>
+                      <span className="text-gray-600 text-xs">Great explanation of the architecture!</span>
+                    </div>
                   </div>
 
-                  <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-lg mt-auto">
-                    <h4 className="font-bold text-xs uppercase tracking-wide text-muted mb-3 flex items-center gap-2">
-                      <FaCommentAlt /> Live Chat (Read Only)
-                    </h4>
-
-                    <div className="space-y-3 text-sm">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 text-xs font-bold">
-                          DS
-                        </div>
-                        <p className="text-xs text-gray-600">
-                          <span className="font-bold text-text">@dev_sarah:</span> Which vector DB supports this natively?
-                        </p>
-                      </div>
-
-                      <div className="flex items-start space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-green-200 flex items-center justify-center text-green-700 text-xs font-bold">
-                          MA
-                        </div>
-                        <p className="text-xs text-gray-600">
-                          <span className="font-bold text-text">@mike_ai:</span> Is the code on GitHub?
-                        </p>
-                      </div>
-
-                      <div className="flex items-start space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">
-                          RM
-                        </div>
-                        <p className="text-xs text-gray-600 bg-blue-50 p-1.5 rounded rounded-tl-none border border-blue-100">
-                          <span className="font-bold text-accent">@ruslanmv:</span> Yes, link in description! We use ChromaDB here.
-                        </p>
-                      </div>
+                  {/* Input Area (Read Only for Demo) */}
+                  <div className="p-3 bg-gray-50 border-t border-border">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        disabled
+                        placeholder="Sign in to chat..."
+                        className="w-full bg-white border border-border rounded px-3 py-2 text-xs focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                      <FaLock className="absolute right-3 top-2.5 text-muted text-xs" />
                     </div>
                   </div>
                 </div>
               </div>
-              {/* End Sidebar */}
             </div>
           </div>
         </section>
 
         {/* Recent Broadcasts (real data from episode index) */}
-        <section className="py-16 bg-white">
+        <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
-              <h3 className="text-2xl font-bold text-text">Recent Broadcasts</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-text">Recent Broadcasts</h2>
               <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className="text-accent font-medium hover:text-accentHover hover:underline text-sm flex items-center"
+                href="/archive"
+                className="text-accent text-sm font-medium hover:underline"
               >
-                View Archive <FaArrowRight className="ml-2 text-xs" />
+                View All Archive
               </a>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recentEpisodes.map((ep) => (
-                <article
-                  key={ep.date || ep.id || ep.youtube_id || ep.title}
-                  className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 relative group cursor-pointer">
-                    {(ep.youtube_url || ep.video_url) && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300 shadow-lg">
-                          <span className="text-accent ml-1">▶</span>
-                        </div>
-                      </div>
-                    )}
-                    <span className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                      {ep.date || formatDate(ep.published_at || ep.created_at || "")}
-                    </span>
-                  </div>
-
-                  <div className="p-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-accent uppercase tracking-wide">Episode</span>
-                      <span className="text-xs text-gray-500">
-                        <FaCalendarAlt className="inline mr-1" /> {ep.date || formatDate(ep.published_at || ep.created_at || "")}
-                      </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {recentEpisodes.map((ep, index) => (
+                <div key={ep.date || ep.id || ep.youtube_id || index} className="group cursor-pointer">
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 mb-3 shadow-sm border border-border group-hover:shadow-md transition-all">
+                    <img
+                      src={`https://picsum.photos/400/225?random=${index + 1}`}
+                      alt={ep.title}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                      {ep.duration || "13:45"}
                     </div>
-
-                    <h4 className="font-bold text-lg mb-2 leading-tight text-text hover:text-accent transition-colors cursor-pointer">
-                      {ep.title}
-                    </h4>
-
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{ep.description}</p>
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
+                    {/* Play Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-10 h-10 bg-accent/90 rounded-full flex items-center justify-center text-white shadow-lg backdrop-blur-sm">
+                        <span className="text-sm ml-0.5">▶</span>
+                      </div>
+                    </div>
                   </div>
-                </article>
+                  <h3 className="font-bold text-sm text-text leading-tight mb-1 group-hover:text-accent transition-colors">
+                    {ep.title}
+                  </h3>
+                  <div className="flex items-center text-xs text-muted">
+                    <span>1.2K views</span>
+                    <span className="mx-1">•</span>
+                    <span>2 days ago</span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
