@@ -90,6 +90,12 @@ export default function AdminPage() {
           >
             <FaChartLine className="mr-3" /> Dashboard
           </button>
+          <a
+            href="/manage_videos.html"
+            className="w-full flex items-center px-6 py-3 font-medium border-r-4 transition-colors text-muted hover:bg-gray-50 hover:text-text border-transparent"
+          >
+            <FaVideo className="mr-3" /> Video Studio
+          </a>
           <button
             onClick={() => switchView("series")}
             className={`w-full flex items-center px-6 py-3 font-medium border-r-4 transition-colors ${
@@ -223,12 +229,18 @@ export default function AdminPage() {
               <div className="bg-white rounded-lg shadow-card border border-border overflow-hidden">
                 <div className="p-6 border-b border-border flex justify-between items-center">
                   <h3 className="font-bold text-text">Recent Uploads</h3>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 items-center">
                     <input
                       type="text"
                       placeholder="Search..."
                       className="bg-lightGray border-none rounded-md px-3 py-1.5 text-sm w-48 focus:ring-1 focus:ring-accent"
                     />
+                    <a
+                      href="/manage_videos.html"
+                      className="text-accent hover:text-accentHover font-medium text-sm whitespace-nowrap flex items-center"
+                    >
+                      <FaVideo className="mr-1" /> Manage All Videos
+                    </a>
                   </div>
                 </div>
                 <div className="overflow-x-auto">

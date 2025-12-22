@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Studio - Video Manager - TV.RuslanMV</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js for Analytics Simulation -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#ffffff",
+                        text: "#0f0f0f",
+                        muted: "#606060",
+                        accent: "#065fd4",
+                        accentHover: "#0056b3",
+                        lightGray: "#f9f9f9",
+                        border: "#e5e5e5",
+                        selected: "#f0f8ff",
+                        success: "#007a33",
+                        danger: "#cc0000"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Roboto', 'Arial', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 4px rgba(0,0,0,0.1)',
+                        'modal': '0 4px 24px rgba(0,0,0,0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .row-actions { visibility: hidden; }
+        tr:hover .row-actions { visibility: visible; }
+
+        .custom-checkbox {
+            appearance: none;
+            background-color: #fff;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 1px solid #606060;
+            border-radius: 2px;
+            display: grid;
+            place-content: center;
+        }
+        .custom-checkbox::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .custom-checkbox:checked { background-color: #0f0f0f; border-color: #0f0f0f; }
+        .custom-checkbox:checked::before { transform: scale(1); }
+
+        .editor-overlay { transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .editor-open { transform: translateX(0%); }
+        .editor-closed { transform: translateX(100%); }
+
+        .nav-active { @apply bg-red-50 text-red-600 border-l-4 border-red-600; }
+        .nav-inactive { @apply text-muted hover:bg-gray-100 border-l-4 border-transparent; }
+
+        .tab-active { @apply border-accent text-accent; }
+        .tab-inactive { @apply border-transparent text-muted hover:text-text; }
+    </style>
+</head>
+<body class="bg-primary text-text font-sans antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-border hidden md:flex flex-col z-20">
+        <div class="h-16 flex items-center px-6 border-b border-border">
+            <div class="w-8 h-8 bg-gray-100 rounded-md overflow-hidden border border-gray-200 mr-3">
+                <img src="https://ui-avatars.com/api/?name=RM&background=268bd2&color=fff&font-size=0.5" class="w-full h-full object-cover" alt="TV Studio">
+            </div>
+            <span class="font-bold text-lg">TV Studio</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-2">
+            <a href="/admin" class="flex items-center px-6 py-3 nav-inactive transition-colors">
+                <i class="fas fa-th-large w-6 text-lg"></i> <span class="text-sm font-medium">Dashboard</span>
+            </a>
+            <a href="#" onclick="switchMainView('content')" id="nav-content" class="flex items-center px-6 py-3 nav-active transition-colors">
+                <i class="fas fa-play-circle w-6 text-lg"></i> <span class="text-sm font-medium">Content</span>
+            </a>
+            <a href="#" onclick="switchMainView('analytics')" id="nav-analytics" class="flex items-center px-6 py-3 nav-inactive transition-colors">
+                <i class="fas fa-chart-bar w-6 text-lg"></i> <span class="text-sm font-medium">Analytics</span>
+            </a>
+            <a href="#" onclick="switchMainView('comments')" id="nav-comments" class="flex items-center px-6 py-3 nav-inactive transition-colors">
+                <i class="fas fa-comment-alt w-6 text-lg"></i> <span class="text-sm font-medium">Comments</span>
+            </a>
+            <div class="border-t border-border my-2"></div>
+            <a href="#" onclick="switchMainView('settings')" id="nav-settings" class="flex items-center px-6 py-3 nav-inactive transition-colors">
+                <i class="fas fa-cog w-6 text-lg"></i> <span class="text-sm font-medium">Settings</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-border">
+            <div class="flex items-center">
+                <img src="https://ruslanmv.com/assets/images/profile.jpg"
+                     onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=0f172a&color=fff'"
+                     class="w-9 h-9 rounded-full mr-3"
+                     alt="Admin">
+                <div>
+                    <p class="text-sm font-bold text-text">Ruslan Magana</p>
+                    <p class="text-xs text-muted">Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 bg-white relative">
+
+        <!-- === VIEW: CONTENT MANAGER === -->
+        <div id="view-content" class="flex-1 flex flex-col h-full">
+            <!-- Header -->
+            <header class="h-16 border-b border-border flex items-center justify-between px-6 bg-white sticky top-0 z-20">
+                <h1 class="text-xl font-bold">Channel content</h1>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-muted"></i>
+                        <input type="text" id="searchFilter" placeholder="Filter" class="pl-10 pr-4 py-2 border border-border rounded-sm text-sm focus:outline-none focus:border-text w-64 transition-colors" onkeyup="filterVideos()">
+                    </div>
+                    <button onclick="showCreateMenu()" class="bg-gray-100 hover:bg-gray-200 text-text font-medium px-4 py-2 rounded-sm text-sm uppercase tracking-wide flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Create
+                    </button>
+                </div>
+            </header>
+
+            <!-- Sub Tabs -->
+            <div class="px-6 border-b border-border flex space-x-8 bg-white z-10">
+                <button onclick="switchContentTab('videos')" id="tab-btn-videos" class="py-4 border-b-4 tab-active font-medium text-sm transition-colors">Videos</button>
+                <button onclick="switchContentTab('live')" id="tab-btn-live" class="py-4 border-b-4 tab-inactive font-medium text-sm transition-colors">Live</button>
+                <button onclick="switchContentTab('playlists')" id="tab-btn-playlists" class="py-4 border-b-4 tab-inactive font-medium text-sm transition-colors">Playlists</button>
+                <button onclick="switchContentTab('podcasts')" id="tab-btn-podcasts" class="py-4 border-b-4 tab-inactive font-medium text-sm transition-colors">Podcasts</button>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="px-6 py-3 border-b border-border flex items-center space-x-2 bg-white">
+                <button class="text-muted hover:text-text"><i class="fas fa-filter"></i></button>
+                <span class="text-sm text-muted">Filter:</span>
+                <button class="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-text hover:bg-gray-200">Visibility</button>
+                <button class="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-text hover:bg-gray-200">Views</button>
+            </div>
+
+            <!-- TAB CONTENT: VIDEOS -->
+            <div id="tab-videos" class="flex-1 overflow-y-auto content-tab">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-white sticky top-0 z-10 border-b border-border text-xs font-bold text-muted uppercase">
+                        <tr>
+                            <th class="p-4 w-12"><input type="checkbox" class="custom-checkbox"></th>
+                            <th class="p-4 w-[40%]">Video</th>
+                            <th class="p-4">Visibility</th>
+                            <th class="p-4">Date</th>
+                            <th class="p-4 text-right">Views</th>
+                            <th class="p-4 text-right">Comments</th>
+                            <th class="p-4 text-right">Likes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="videosTableBody" class="divide-y divide-border text-sm">
+                        <!-- Videos will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB CONTENT: LIVE -->
+            <div id="tab-live" class="hidden flex-1 overflow-y-auto content-tab p-8 text-center">
+                <div class="max-w-md mx-auto mt-10">
+                    <i class="fas fa-broadcast-tower text-6xl text-gray-200 mb-4"></i>
+                    <h3 class="text-lg font-bold text-text mb-2">No upcoming live streams</h3>
+                    <p class="text-muted text-sm mb-6">Schedule a stream to see it here.</p>
+                    <button onclick="alert('Live streaming feature coming soon!')" class="bg-accent text-white px-4 py-2 rounded-sm text-sm font-medium">Schedule Stream</button>
+                </div>
+            </div>
+
+            <!-- TAB CONTENT: PLAYLISTS -->
+            <div id="tab-playlists" class="hidden flex-1 overflow-y-auto content-tab p-6">
+                <div id="playlistsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Playlists will be loaded dynamically -->
+                </div>
+            </div>
+
+             <!-- TAB CONTENT: PODCASTS -->
+            <div id="tab-podcasts" class="hidden flex-1 overflow-y-auto content-tab p-6">
+                 <div class="border border-dashed border-muted rounded-lg p-12 text-center bg-gray-50">
+                     <p class="text-muted font-medium">You haven't created any podcasts yet.</p>
+                     <button onclick="alert('Podcast feature coming soon!')" class="mt-4 text-accent font-medium hover:underline">New Podcast</button>
+                 </div>
+            </div>
+        </div>
+
+        <!-- === VIEW: ANALYTICS === -->
+        <div id="view-analytics" class="hidden flex-1 flex-col h-full overflow-y-auto bg-lightGray">
+            <header class="h-16 border-b border-border flex items-center justify-between px-6 bg-white sticky top-0 z-20">
+                <h1 class="text-xl font-bold">Channel analytics</h1>
+                <div class="text-sm text-muted">Last 28 days</div>
+            </header>
+
+            <div class="p-6 max-w-6xl mx-auto w-full">
+                <!-- Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-border text-center">
+                        <p class="text-sm text-muted mb-1">Views</p>
+                        <h3 class="text-2xl font-bold text-text" id="total-views">0</h3>
+                        <p class="text-xs text-success mt-1"><i class="fas fa-arrow-up"></i> 12% more than usual</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-border text-center">
+                        <p class="text-sm text-muted mb-1">Watch time (hours)</p>
+                        <h3 class="text-2xl font-bold text-text">8.4K</h3>
+                        <p class="text-xs text-success mt-1"><i class="fas fa-arrow-up"></i> 5% more than usual</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-sm border border-border text-center">
+                        <p class="text-sm text-muted mb-1">Total Videos</p>
+                        <h3 class="text-2xl font-bold text-text" id="total-videos">0</h3>
+                        <p class="text-xs text-muted mt-1">Published content</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-sm border border-border text-center">
+                        <p class="text-sm text-muted mb-1">Avg View Duration</p>
+                        <h3 class="text-2xl font-bold text-text">6:42</h3>
+                        <p class="text-xs text-success mt-1"><i class="fas fa-arrow-up"></i> 8% more than usual</p>
+                    </div>
+                </div>
+
+                <!-- Main Chart -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-border mb-6">
+                    <h3 class="font-bold text-lg mb-4">Views over time</h3>
+                    <div class="h-64 bg-gray-50 flex items-center justify-center border border-dashed border-gray-300 rounded">
+                        <canvas id="viewsChart" class="w-full h-full"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Content -->
+                 <div class="bg-white p-6 rounded-lg shadow-sm border border-border">
+                    <h3 class="font-bold text-lg mb-4">Your top content in this period</h3>
+                    <div id="topContentList" class="space-y-4">
+                        <!-- Top content will be loaded dynamically -->
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+        <!-- === VIEW: COMMENTS === -->
+        <div id="view-comments" class="hidden flex-1 flex-col h-full overflow-y-auto bg-white">
+            <header class="h-16 border-b border-border flex items-center justify-between px-6 bg-white sticky top-0 z-20">
+                <h1 class="text-xl font-bold">Channel comments</h1>
+                <div class="flex space-x-2">
+                     <button class="text-muted hover:text-text"><i class="fas fa-filter"></i></button>
+                </div>
+            </header>
+            <div class="px-6 border-b border-border flex space-x-8 bg-white">
+                <button class="py-4 border-b-4 border-accent text-accent font-medium text-sm">Published</button>
+                <button class="py-4 border-b-4 border-transparent text-muted hover:text-text font-medium text-sm">Held for review</button>
+            </div>
+
+            <div id="commentsContainer" class="flex-1 overflow-y-auto">
+                <!-- Comments will be loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- === VIEW: SETTINGS === -->
+        <div id="view-settings" class="hidden flex-1 flex-col h-full overflow-y-auto bg-lightGray">
+            <div class="max-w-4xl mx-auto w-full p-8">
+                 <h1 class="text-2xl font-bold mb-6">Settings</h1>
+
+                 <div class="bg-white border border-border rounded shadow-sm overflow-hidden flex min-h-[500px]">
+                     <!-- Settings Sidebar -->
+                     <div class="w-48 border-r border-border bg-gray-50 p-2 space-y-1">
+                         <button class="w-full text-left px-4 py-2 text-sm font-bold text-accent bg-gray-200 rounded-sm">General</button>
+                         <button class="w-full text-left px-4 py-2 text-sm font-medium text-muted hover:bg-gray-100 rounded-sm">Channel</button>
+                         <button class="w-full text-left px-4 py-2 text-sm font-medium text-muted hover:bg-gray-100 rounded-sm">Upload defaults</button>
+                         <button class="w-full text-left px-4 py-2 text-sm font-medium text-muted hover:bg-gray-100 rounded-sm">Permissions</button>
+                     </div>
+
+                     <!-- Settings Content -->
+                     <div class="flex-1 p-8">
+                         <h3 class="font-bold text-lg mb-6">General Settings</h3>
+
+                         <div class="mb-6">
+                             <label class="block text-xs font-bold text-muted uppercase mb-2">Default visibility</label>
+                             <select class="w-64 border border-border rounded-sm p-2 text-sm bg-white">
+                                 <option>Public</option>
+                                 <option>Unlisted</option>
+                                 <option>Private</option>
+                             </select>
+                         </div>
+
+                         <div class="mb-6">
+                             <label class="block text-xs font-bold text-muted uppercase mb-2">Appearance</label>
+                             <div class="flex items-center space-x-4">
+                                 <label class="flex items-center space-x-2">
+                                     <input type="radio" name="theme" checked> <span class="text-sm">Light</span>
+                                 </label>
+                                 <label class="flex items-center space-x-2">
+                                     <input type="radio" name="theme"> <span class="text-sm">Dark</span>
+                                 </label>
+                             </div>
+                         </div>
+
+                         <div class="flex justify-end pt-8 mt-8 border-t border-border">
+                             <button class="text-muted font-medium text-sm mr-4">Cancel</button>
+                             <button class="bg-accent text-white px-6 py-2 rounded-sm text-sm font-medium" onclick="saveSettings()">Save</button>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FULL SCREEN EDITOR OVERLAY (Hidden by default) -->
+    <div id="videoEditor" class="fixed inset-0 bg-white z-50 flex flex-col editor-overlay editor-closed shadow-modal">
+        <!-- Editor Header -->
+        <div class="h-16 border-b border-border flex items-center justify-between px-6 bg-white sticky top-0">
+            <div class="flex items-center">
+                <button onclick="closeEditor()" class="mr-4 text-muted hover:text-text"><i class="fas fa-arrow-left text-xl"></i></button>
+                <h2 class="text-xl font-bold">Video details</h2>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="resetEditor()" class="text-sm font-medium text-muted hover:text-text uppercase tracking-wide">Undo Changes</button>
+                <button onclick="saveVideoDetails()" class="bg-accent hover:bg-accentHover text-white px-6 py-2 rounded-sm text-sm font-medium uppercase shadow-sm">Save</button>
+            </div>
+        </div>
+
+        <!-- Editor Body -->
+        <div class="flex-1 overflow-hidden flex">
+            <!-- Left Scrollable Form -->
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-3xl">
+                    <input type="hidden" id="edit-video-id">
+
+                    <!-- Title -->
+                    <div class="mb-6 group">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-xs font-bold text-muted">Title (required)</label>
+                            <i class="far fa-question-circle text-muted text-xs cursor-help"></i>
+                        </div>
+                        <div class="relative">
+                            <input type="text" id="edit-title" class="w-full border border-border rounded-sm p-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all" value="" maxlength="100" oninput="updateCharCount()">
+                            <div class="absolute right-2 bottom-2 text-xs text-muted" id="title-count">0/100</div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-8 group">
+                        <label class="block text-xs font-bold text-muted mb-1">Description</label>
+                        <div class="relative">
+                            <textarea id="edit-desc" class="w-full border border-border rounded-sm p-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all h-48 resize-y" placeholder="Tell viewers about your video..." maxlength="5000" oninput="updateCharCount()"></textarea>
+                            <div class="absolute right-2 bottom-2 text-xs text-muted" id="desc-count">0/5000</div>
+                        </div>
+                    </div>
+
+                    <!-- Thumbnails -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-medium text-text mb-3">Thumbnail</label>
+                        <p class="text-xs text-muted mb-3">Select or upload a picture that shows what's in your video.</p>
+                        <div class="flex space-x-4">
+                            <div class="w-32 h-20 border border-dashed border-muted rounded-sm flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 text-muted hover:text-text transition-colors" onclick="alert('File upload would trigger here')">
+                                <i class="fas fa-image mb-1"></i>
+                                <span class="text-[10px] uppercase font-bold">Upload file</span>
+                            </div>
+                            <div id="thumbnail-1" class="w-32 h-20 border-2 border-accent rounded-sm overflow-hidden cursor-pointer relative">
+                                <img src="https://picsum.photos/320/180?random=1" class="w-full h-full object-cover">
+                            </div>
+                            <div id="thumbnail-2" class="w-32 h-20 border border-transparent rounded-sm overflow-hidden cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                <img src="https://picsum.photos/320/180?random=10" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-muted mb-1">Tags</label>
+                        <p class="text-xs text-muted mb-2">Tags help viewers find your video</p>
+                        <input type="text" id="edit-tags" class="w-full border border-border rounded-sm p-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none" placeholder="AI, Machine Learning, Tutorial">
+                    </div>
+
+                    <!-- Series/Playlist -->
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-muted mb-1">Add to series</label>
+                        <select id="edit-series" class="w-full border border-border rounded-sm p-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none">
+                            <option value="">None</option>
+                            <option value="daily-ai-news">Daily AI News</option>
+                            <option value="tutorials">Tutorials</option>
+                            <option value="weekly-recap">Weekly Recap</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar (Preview & Visibility) -->
+            <div class="w-80 bg-lightGray border-l border-border p-6 flex-shrink-0 overflow-y-auto">
+                <!-- Visibility Card -->
+                <div class="bg-white border border-border rounded-sm p-4 mb-4 shadow-sm">
+                    <h3 class="font-bold text-sm text-text mb-3">Visibility</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-start space-x-2 cursor-pointer">
+                            <input type="radio" name="visibility" value="private" class="mt-1">
+                            <div>
+                                <span class="block text-sm font-medium">Private</span>
+                                <span class="text-xs text-muted">Only you can view</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start space-x-2 cursor-pointer">
+                            <input type="radio" name="visibility" value="unlisted" class="mt-1">
+                            <div>
+                                <span class="block text-sm font-medium">Unlisted</span>
+                                <span class="text-xs text-muted">Anyone with link</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start space-x-2 cursor-pointer">
+                            <input type="radio" name="visibility" value="public" class="mt-1" checked>
+                            <div>
+                                <span class="block text-sm font-medium">Public</span>
+                                <span class="text-xs text-muted">Everyone can watch</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Video Preview -->
+                <div class="bg-white border border-border rounded-sm p-4 shadow-sm">
+                    <h3 class="font-bold text-sm text-text mb-3">Preview</h3>
+                    <div class="bg-black rounded-sm overflow-hidden mb-2">
+                        <img id="preview-thumbnail" src="https://picsum.photos/320/180?random=1" class="w-full" alt="Preview">
+                    </div>
+                    <p class="text-xs text-muted">Video ID: <span id="preview-id"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data Store ---
+        let videosData = [];
+        let currentEditingVideo = null;
+
+        // --- Initialize ---
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVideosFromAPI();
+            loadPlaylistsFromAPI();
+            loadCommentsFromAPI();
+        });
+
+        // --- API Integration ---
+        async function loadVideosFromAPI() {
+            try {
+                const response = await fetch('/api/episodes');
+                if (response.ok) {
+                    const data = await response.json();
+                    videosData = data.episodes || [];
+                } else {
+                    // Fallback to sample data
+                    videosData = getSampleVideos();
+                }
+            } catch (error) {
+                console.warn('Failed to load videos, using sample data:', error);
+                videosData = getSampleVideos();
+            }
+            renderVideosTable();
+            updateAnalytics();
+        }
+
+        function getSampleVideos() {
+            return [
+                {
+                    id: '2025-12-22-intro-genai',
+                    title: 'Introduction to Generative AI & LLMs',
+                    description: 'In this video we explore the architecture of Transformers and how they power modern AI...',
+                    date: '2025-12-22',
+                    visibility: 'public',
+                    views: 1245,
+                    comments: 45,
+                    likes: 98.5,
+                    thumbnail: 'https://picsum.photos/320/180?random=1',
+                    duration: '12:45',
+                    series: 'tutorials'
+                },
+                {
+                    id: '2025-12-21-langchain-deep-dive',
+                    title: 'LangChain Deep Dive',
+                    description: 'Mastering chains, agents, and memory in LangChain...',
+                    date: '2025-12-21',
+                    visibility: 'unlisted',
+                    views: 340,
+                    comments: 12,
+                    likes: 100,
+                    thumbnail: 'https://picsum.photos/320/180?random=2',
+                    duration: '45:10',
+                    series: 'tutorials'
+                },
+                {
+                    id: '2025-12-20-daily-ai-news',
+                    title: 'Daily AI News - Dec 20',
+                    description: "Today's top AI developments and breakthroughs...",
+                    date: '2025-12-20',
+                    visibility: 'public',
+                    views: 890,
+                    comments: 23,
+                    likes: 95.2,
+                    thumbnail: 'https://picsum.photos/320/180?random=3',
+                    duration: '8:30',
+                    series: 'daily-ai-news'
+                }
+            ];
+        }
+
+        function renderVideosTable() {
+            const tbody = document.getElementById('videosTableBody');
+            if (!tbody) return;
+
+            tbody.innerHTML = videosData.map(video => `
+                <tr class="hover:bg-gray-50 group cursor-pointer transition-colors" onclick="openEditor('${video.id}')">
+                    <td class="p-4 align-top pt-6" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="custom-checkbox">
+                    </td>
+                    <td class="p-4">
+                        <div class="flex">
+                            <div class="w-32 h-20 bg-gray-200 rounded-sm overflow-hidden flex-shrink-0 relative mr-4">
+                                <img src="${video.thumbnail}" class="w-full h-full object-cover" alt="${video.title}">
+                                <span class="absolute bottom-1 right-1 bg-black text-white text-xs px-1 rounded-sm">${video.duration}</span>
+                            </div>
+                            <div class="flex flex-col justify-start py-1">
+                                <h3 class="font-medium text-text text-base line-clamp-1 mb-1">${video.title}</h3>
+                                <p class="text-xs text-muted line-clamp-2 mb-2">${video.description}</p>
+                                <div class="row-actions flex space-x-4 text-muted text-lg">
+                                    <button class="hover:text-accent" onclick="event.stopPropagation(); openEditor('${video.id}')"><i class="fas fa-pen"></i></button>
+                                    <button class="hover:text-accent" onclick="event.stopPropagation(); viewAnalytics('${video.id}')"><i class="fas fa-chart-bar"></i></button>
+                                    <button class="hover:text-accent" onclick="event.stopPropagation(); viewComments('${video.id}')"><i class="fas fa-comment-alt"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4 align-top pt-6">
+                        <div class="flex items-center ${video.visibility === 'public' ? 'text-success' : 'text-muted'}">
+                            <i class="fas ${video.visibility === 'public' ? 'fa-eye' : 'fa-link'} mr-2"></i>
+                            <span class="capitalize">${video.visibility}</span>
+                        </div>
+                    </td>
+                    <td class="p-4 align-top pt-6">
+                        <div class="flex flex-col">
+                            <span class="text-text">${formatDate(video.date)}</span>
+                            <span class="text-xs text-muted">Published</span>
+                        </div>
+                    </td>
+                    <td class="p-4 align-top pt-6 text-right">${formatNumber(video.views)}</td>
+                    <td class="p-4 align-top pt-6 text-right">${video.comments}</td>
+                    <td class="p-4 align-top pt-6 text-right">${video.likes}%</td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadPlaylistsFromAPI() {
+            // For now, use sample data
+            const playlists = [
+                { title: 'Mastering GenAI', videos: 12, updated: 'yesterday' },
+                { title: 'Python for Data Science', videos: 8, updated: '3 days ago' },
+                { title: 'Daily AI News', videos: 45, updated: 'today' },
+                { title: 'Weekly Recap', videos: 12, updated: '1 week ago' }
+            ];
+
+            const grid = document.getElementById('playlistsGrid');
+            if (!grid) return;
+
+            grid.innerHTML = playlists.map(playlist => `
+                <div class="border border-border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="h-32 bg-gray-800 relative flex items-center justify-center">
+                        <span class="text-white font-bold">${playlist.videos} Videos</span>
+                        <div class="absolute bottom-0 right-0 bg-black/80 text-white p-1 text-xs">
+                            <i class="fas fa-list"></i>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-text mb-1">${playlist.title}</h4>
+                        <p class="text-xs text-muted">Updated ${playlist.updated}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadCommentsFromAPI() {
+            const comments = [
+                {
+                    author: 'John Doe',
+                    avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=random',
+                    time: '2 hours ago',
+                    text: 'Great explanation of RAG pipelines! Could you do a video on vector databases next?',
+                    video: 'Intro to Generative AI',
+                    thumbnail: 'https://picsum.photos/120/68?random=1'
+                },
+                {
+                    author: 'Alice Smith',
+                    avatar: 'https://ui-avatars.com/api/?name=Alice+Smith&background=random',
+                    time: '5 hours ago',
+                    text: 'The audio is a bit low in the second half, but great content otherwise.',
+                    video: 'LangChain Deep Dive',
+                    thumbnail: 'https://picsum.photos/120/68?random=2'
+                },
+                {
+                    author: 'Bob Johnson',
+                    avatar: 'https://ui-avatars.com/api/?name=Bob+Johnson&background=random',
+                    time: '1 day ago',
+                    text: 'This tutorial helped me build my first AI agent. Thank you!',
+                    video: 'Intro to Generative AI',
+                    thumbnail: 'https://picsum.photos/120/68?random=1'
+                }
+            ];
+
+            const container = document.getElementById('commentsContainer');
+            if (!container) return;
+
+            container.innerHTML = comments.map(comment => `
+                <div class="flex p-4 border-b border-border hover:bg-gray-50 group">
+                    <img src="${comment.avatar}" class="w-10 h-10 rounded-full mr-4" alt="${comment.author}">
+                    <div class="flex-1">
+                        <div class="flex items-baseline mb-1">
+                            <span class="font-bold text-xs mr-2">${comment.author}</span>
+                            <span class="text-xs text-muted">${comment.time}</span>
+                        </div>
+                        <p class="text-sm text-text mb-2">${comment.text}</p>
+                        <div class="flex items-center space-x-4 text-muted text-sm">
+                            <button class="hover:text-text"><i class="far fa-thumbs-up"></i></button>
+                            <button class="hover:text-text"><i class="far fa-thumbs-down"></i></button>
+                            <button class="hover:text-text font-medium">Reply</button>
+                            <button class="hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-32 ml-4">
+                        <img src="${comment.thumbnail}" class="rounded-sm opacity-80 hover:opacity-100 cursor-pointer" alt="${comment.video}">
+                        <p class="text-xs text-muted truncate mt-1">${comment.video}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- View Controller ---
+        function switchMainView(viewId) {
+            // Hide all views
+            document.querySelectorAll('[id^="view-"]').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+
+            // Show selected
+            const view = document.getElementById('view-' + viewId);
+            view.classList.remove('hidden');
+            view.classList.add('flex');
+
+            // Update Nav Styles
+            document.querySelectorAll('aside nav a').forEach(el => {
+                el.classList.remove('nav-active');
+                el.classList.add('nav-inactive');
+            });
+            const navEl = document.getElementById('nav-' + viewId);
+            if (navEl) {
+                navEl.classList.add('nav-active');
+                navEl.classList.remove('nav-inactive');
+            }
+
+            // Init Chart if Analytics
+            if(viewId === 'analytics') initChart();
+        }
+
+        // --- Sub-Tab Controller (Content) ---
+        function switchContentTab(tabId) {
+            // Hide all content tabs
+            document.querySelectorAll('.content-tab').forEach(el => el.classList.add('hidden'));
+            // Show selected
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            // Update Tab Styles
+            document.querySelectorAll('[id^="tab-btn-"]').forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('tab-inactive');
+            });
+            const tabBtn = document.getElementById('tab-btn-' + tabId);
+            if (tabBtn) {
+                tabBtn.classList.add('tab-active');
+                tabBtn.classList.remove('tab-inactive');
+            }
+        }
+
+        // --- Editor Logic ---
+        function openEditor(videoId) {
+            const video = videosData.find(v => v.id === videoId);
+            if (!video) return;
+
+            currentEditingVideo = { ...video }; // Clone for editing
+
+            document.getElementById('edit-video-id').value = video.id;
+            document.getElementById('edit-title').value = video.title;
+            document.getElementById('edit-desc').value = video.description;
+            document.getElementById('edit-tags').value = video.tags || '';
+            document.getElementById('edit-series').value = video.series || '';
+            document.getElementById('preview-id').textContent = video.id;
+            document.getElementById('preview-thumbnail').src = video.thumbnail;
+
+            // Set visibility
+            document.querySelectorAll('input[name="visibility"]').forEach(radio => {
+                radio.checked = radio.value === video.visibility;
+            });
+
+            updateCharCount();
+
+            document.getElementById('videoEditor').classList.remove('editor-closed');
+            document.getElementById('videoEditor').classList.add('editor-open');
+        }
+
+        function closeEditor() {
+            document.getElementById('videoEditor').classList.remove('editor-open');
+            document.getElementById('videoEditor').classList.add('editor-closed');
+            currentEditingVideo = null;
+        }
+
+        function resetEditor() {
+            if (currentEditingVideo) {
+                openEditor(currentEditingVideo.id);
+            }
+        }
+
+        function updateCharCount() {
+            const title = document.getElementById('edit-title').value;
+            const desc = document.getElementById('edit-desc').value;
+            document.getElementById('title-count').textContent = `${title.length}/100`;
+            document.getElementById('desc-count').textContent = `${desc.length}/5000`;
+        }
+
+        async function saveVideoDetails() {
+            const videoId = document.getElementById('edit-video-id').value;
+            const title = document.getElementById('edit-title').value;
+            const description = document.getElementById('edit-desc').value;
+            const tags = document.getElementById('edit-tags').value;
+            const series = document.getElementById('edit-series').value;
+            const visibility = document.querySelector('input[name="visibility"]:checked').value;
+
+            // Update local data
+            const videoIndex = videosData.findIndex(v => v.id === videoId);
+            if (videoIndex !== -1) {
+                videosData[videoIndex] = {
+                    ...videosData[videoIndex],
+                    title,
+                    description,
+                    tags,
+                    series,
+                    visibility
+                };
+            }
+
+            // In real implementation, would call API here
+            // await fetch('/api/episodes/' + videoId, { method: 'PUT', body: JSON.stringify(...) });
+
+            alert('Video details saved! (In production, this would update the backend)');
+            closeEditor();
+            renderVideosTable();
+        }
+
+        // --- Analytics ---
+        function updateAnalytics() {
+            const totalViews = videosData.reduce((sum, v) => sum + v.views, 0);
+            const totalVideos = videosData.length;
+
+            document.getElementById('total-views').textContent = formatNumber(totalViews);
+            document.getElementById('total-videos').textContent = totalVideos;
+
+            // Update top content
+            const topContent = [...videosData]
+                .sort((a, b) => b.views - a.views)
+                .slice(0, 3);
+
+            const topContentList = document.getElementById('topContentList');
+            if (topContentList) {
+                topContentList.innerHTML = topContent.map(video => `
+                    <div class="flex items-center justify-between pb-2 border-b border-lightGray">
+                        <div class="flex items-center">
+                            <img src="${video.thumbnail}" class="rounded-sm mr-3 w-16 h-9" alt="${video.title}">
+                            <span class="text-sm font-medium">${video.title}</span>
+                        </div>
+                        <span class="text-sm text-muted">${formatNumber(video.views)} views</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        let chartInstance = null;
+        function initChart() {
+            const ctx = document.getElementById('viewsChart');
+            if (!ctx) return;
+
+            if(chartInstance) return; // Prevent recreation
+
+            chartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 5', 'Day 10', 'Day 15', 'Day 20', 'Day 25', 'Day 28'],
+                    datasets: [{
+                        label: 'Views',
+                        data: [1200, 3500, 4200, 6000, 5800, 9000, 12000],
+                        borderColor: '#065fd4',
+                        backgroundColor: 'rgba(6, 95, 212, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#e5e5e5' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- Utility Functions ---
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        function filterVideos() {
+            const query = document.getElementById('searchFilter').value.toLowerCase();
+            const filtered = videosData.filter(v =>
+                v.title.toLowerCase().includes(query) ||
+                v.description.toLowerCase().includes(query)
+            );
+
+            const tbody = document.getElementById('videosTableBody');
+            if (!tbody) return;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="p-8 text-center text-muted">
+                            No videos found matching "${query}"
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // Re-render with filtered data
+                const temp = videosData;
+                videosData = filtered;
+                renderVideosTable();
+                videosData = temp;
+            }
+        }
+
+        function showCreateMenu() {
+            alert('Create menu would show options:\n- Upload Video\n- Create Live Stream\n- New Playlist\n- New Podcast');
+        }
+
+        function viewAnalytics(videoId) {
+            alert('Would show detailed analytics for video: ' + videoId);
+        }
+
+        function viewComments(videoId) {
+            switchMainView('comments');
+        }
+
+        function saveSettings() {
+            alert('Settings saved successfully!');
+        }
+    </script>
+</body>
+</html>
